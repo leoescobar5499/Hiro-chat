@@ -63,9 +63,10 @@ Necesitás al menos una API key para que el chat funcione. Las opciones gratuita
 
 ## Cómo nació este proyecto
 
-Una colaboración bastante inusual entre un humano y dos IAs. La arquitectura, el backend y el sistema de memoria se desarrollaron en conversación con Claude (Anthropic) — que actuó como programador principal. Gemini (Google) aportó en la interfaz visual. El humano detrás del proyecto aportó la visión, las decisiones de diseño y todo lo que ninguna IA podía hacer sola.
+Este proyecto nació de las ganas de divertirse construyendo algo, sin más pretensiones que esa.
+La arquitectura, el backend y el sistema de memoria se desarrollaron en conversación con Claude (Anthropic). Gemini (Google) aportó en la interfaz visual. Y el humano detrás de todo puso la visión, las ideas, las decisiones y el entusiasmo que ninguna IA podía poner sola.
 
-Una demostración práctica de lo que se puede construir colaborando con modelos de lenguaje desde cero.
+Llevó semanas, fue una colaboración rara y genuina, y el objetivo siempre fue simple: que la gente se divierta usándolo.
 
 ---
 
