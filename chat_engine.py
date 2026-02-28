@@ -115,8 +115,10 @@ def _detectar_query_busqueda(mensaje):
         ]):
             return None
 
+        # Usar el modelo de extracción configurado (respeta el proveedor activo)
+        modelo_extraccion = _get_modelo('extraction')
         resp = llamada_mistral_segura(
-            model='mistral-small-latest',
+            model=modelo_extraccion,
             messages=[{
                 'role': 'user',
                 'content': (
