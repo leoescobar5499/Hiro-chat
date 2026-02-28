@@ -69,11 +69,31 @@ def get_api_config():
 
 @bp.route('/api/config/apis', methods=['POST'])
 def save_api_config():
-    """Guardar configuración de APIs"""
+    """Guardar configuración de APIs — también sincroniza modelos_activos.json"""
     try:
         from utils import guardar_config_apis
+        from modelos_utils import guardar_modelos_activos, cargar_modelos_activos
         data = request.get_json()
         guardar_config_apis(data)
+
+        # ── Sincronizar modelos_activos.json automáticamente ─────────────────
+        # Así el gestor visual es la única fuente de verdad, sin tocar JSONs a mano.
+        models   = data.get('models', {})
+        provider = data.get('fallback', {}).get('primaryProvider', 'mistral')
+        chat_model  = models.get('chat', '')
+        small_model = models.get('extraction', '')
+
+        activos = cargar_modelos_activos()
+        activos['provider'] = provider
+        if provider == 'openrouter':
+            if chat_model:  activos['openrouter_chat']  = chat_model
+            if small_model: activos['openrouter_small'] = small_model
+        else:
+            if chat_model:  activos['mistral_chat']  = chat_model
+            if small_model: activos['mistral_small'] = small_model
+        guardar_modelos_activos(activos)
+        print(f"✅ modelos_activos.json sincronizado — provider={provider}, chat={chat_model}, small={small_model}")
+
         return jsonify({"ok": True, "mensaje": "Configuración guardada"})
     except Exception as e:
         print(f"❌ Error guardando config: {e}")
@@ -2287,3 +2307,4 @@ def api_imagen_expresion(eid):
     except Exception as e:
         print(f'[EXPR] ERROR leyendo {ruta}: {e}')
         return '', 500
+
