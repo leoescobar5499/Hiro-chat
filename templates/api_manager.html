@@ -414,10 +414,7 @@
                             <option value="open-mistral-nemo">Open Mistral Nemo</option>
                         </optgroup>
                         <optgroup label="── OpenRouter (Sin Censura) ──">
-                            <option value="meta-llama/llama-2-70b-chat">Llama 2 70B</option>
-                            <option value="mistralai/mixtral-8x7b-instruct">Mixtral 8x7B</option>
-                            <option value="nousresearch/hermes-3-llama-3.1-405b:nitro">Hermes 3 405B (Sin censura)</option>
-                            <option value="gryphe/mythomax-l2-13b">MythoMax 13B (Sin censura)</option>
+                            
                         </optgroup>
                     </select>
                     <p class="api-model-cost">Coste: Medio-Alto | Latencia: 1-3s</p>
@@ -431,7 +428,7 @@
                     <div style="margin-bottom: 8px;">
                         <label class="api-label" style="font-size:0.7rem;">Proveedor de Embeddings</label>
                         <select id="embedding-provider" class="api-select" onchange="actualizarOpcionesEmbedding(); saveConfig()">
-                            <option value="mistral">Mistral AI</option>
+                            <option value="mistral">Mistral AI (Recomendado)</option>
                             <option value="openai">OpenAI</option>
                             <option value="cohere">Cohere</option>
                             <option value="jina">Jina AI</option>
@@ -441,7 +438,7 @@
 
                     <select id="model-embeddings" class="api-select" onchange="saveConfig()">
                         <optgroup label="── Mistral AI (1024 dims) ──">
-                            <option value="mistral-embed">mistral-embed · 1024 dims</option>
+                            <option value="mistral-embed">mistral-embed · 1024 dims (Recomendado)</option>
                         </optgroup>
                         <optgroup label="── OpenAI ──">
                             <option value="text-embedding-3-small">text-embedding-3-small · 1536 dims · Barato</option>
@@ -529,8 +526,8 @@
                     <p class="api-model-desc">Análisis profundo de episodios de chat</p>
                     <select id="model-enrichment" class="api-select" onchange="saveConfig()">
                         <optgroup label="── Mistral AI ──">
-                            <option value="mistral-medium-latest">Mistral Medium (Recomendado)</option>
-                            <option value="mistral-small-latest">Mistral Small</option>
+                            <option value="mistral-medium-latest">Mistral Medium</option>
+                            <option value="mistral-small-latest">Mistral Small(Recomendado)</option>
                         </optgroup>
                         <optgroup label="── OpenRouter ──">
                             <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Gratis)</option>
