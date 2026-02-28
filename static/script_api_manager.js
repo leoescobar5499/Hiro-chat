@@ -23,13 +23,46 @@ const MISTRAL_EMBED_DIM = 1024;
 // INICIALIZACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 
+let _cargandoConfig = false;  // bloquea saves automáticos durante loadConfig
+
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🔧 Inicializando Gestor de APIs...');
     await cargarModelosEnDropdowns();
+    _cargandoConfig = true;
     await loadConfig();
+    _cargandoConfig = false;
     updateStatusIndicators();
     adjustPaddingForFooter();
+
+    // Auto-sync: solo en interacción real del usuario (no durante carga)
+    const modelChatInput = document.getElementById('model-chat');
+    if (modelChatInput) {
+        modelChatInput.addEventListener('change', () => sincronizarProveedorDesdeChat());
+        modelChatInput.addEventListener('blur',   () => sincronizarProveedorDesdeChat());
+    }
 });
+
+function sincronizarProveedorDesdeChat() {
+    if (_cargandoConfig) return;  // no actuar durante la carga inicial
+    const chatModel = (document.getElementById('model-chat')?.value || '').trim();
+    if (!chatModel) return;
+    const esOpenRouter = chatModel.includes('/');
+
+    // Solo actualizar proveedor primario — NUNCA tocar los otros modelos de tarea
+    const selPrimary = document.getElementById('fallback-primary');
+    if (selPrimary) selPrimary.value = esOpenRouter ? 'openrouter' : 'mistral';
+
+    // Habilitar el proveedor correcto
+    const cbOR = document.getElementById('openrouter-enabled');
+    const cbMI = document.getElementById('mistral-enabled');
+    if (esOpenRouter && cbOR && !cbOR.checked) cbOR.checked = true;
+    if (!esOpenRouter && cbMI && !cbMI.checked) cbMI.checked = true;
+
+    // Mostrar aviso visual
+    const provName = esOpenRouter ? '🟠 OpenRouter' : '🔵 Mistral';
+    showToast(`Proveedor detectado: ${provName} — guardá para aplicar`, 'info');
+    saveConfig();
+}
 
 window.addEventListener('resize', adjustPaddingForFooter);
 
@@ -230,13 +263,17 @@ async function saveConfig() {
                 logging:          _checked('nsfw-logging', true)
             },
             // ── Fallbacks ─────────────────────────────────────────────────
-            fallback: {
-                enabled:           _checked('fallback-enabled', true),
-                primaryProvider:   _val('fallback-primary', 'mistral'),
-                secondaryProvider: _val('fallback-secondary', 'openrouter'),
-                retryEnabled:      _checked('retry-count', true),
-                retryAttempts:     parseInt(_val('retry-attempts')) || 3
-            },
+            fallback: (() => {
+                // Leer el proveedor del select (ya fue sincronizado por sincronizarProveedorDesdeChat)
+                const primaryProvider = _val('fallback-primary') || 'mistral';
+                return {
+                    enabled:           _checked('fallback-enabled', true),
+                    primaryProvider:   primaryProvider,
+                    secondaryProvider: primaryProvider === 'openrouter' ? 'mistral' : 'openrouter',
+                    retryEnabled:      _checked('retry-count', true),
+                    retryAttempts:     parseInt(_val('retry-attempts')) || 3
+                };
+            })(),
             queueEnabled: _checked('queue-enabled', true),
             // ── Búsqueda en internet ──────────────────────────────────────
             search: {
@@ -989,3 +1026,4 @@ async function eliminarModeloLibreria(modeloId) {
 function copiarModeloId(modeloId) {
     navigator.clipboard.writeText(modeloId).then(() => mostrarNotificacion(`✅ Copiado: ${modeloId}`, 'success'));
 }
+
