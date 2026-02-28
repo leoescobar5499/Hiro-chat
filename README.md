@@ -1,3 +1,23 @@
+🤖 Hiro Chat
+Compañero virtual de roleplay con memoria persistente, multimodelo y multipersonaje.
+Hiro Chat es una aplicación web local construida con Flask que te permite chatear con personajes de IA que realmente te recuerdan. No es solo un chatbot — tiene un sistema de memoria episódica, extracción de hechos, síntesis de conocimiento, embeddings semánticos con FAISS, evolución de relación a lo largo del tiempo, expresiones faciales, escenarios, eventos, diarios automáticos y soporte para múltiples proveedores de IA (Mistral, OpenRouter, OpenAI, Cohere, Jina, Ollama).
+✨ Features principales
+
+🧠 Memoria real — aprende sobre vos, genera síntesis, recuerda entre sesiones
+👥 Multipersonaje — cada personaje tiene su propia DB, embeddings y config de API
+🌐 Multimodelo — cambiá de proveedor o modelo sin tocar código
+🎭 Sistema de expresiones — imágenes que cambian según la respuesta del personaje
+📖 Diarios automáticos — el personaje escribe sobre lo que vivieron juntos
+🌱 Evolución de fases — la relación y la personalidad cambian con el tiempo
+⚡ Eventos y escenarios — narrativa dinámica con disparadores automáticos
+
+🛠️ Cómo nació este proyecto
+Este proyecto fue una colaboración humano-IA bastante inusual. La arquitectura, la lógica del backend, el sistema de memoria y la mayor parte del código fueron desarrollados en conversación con Claude (Anthropic) y Gemini (Google) — que actuaron como programadores principales. Gemini aportó mucho en la interfaz visual de las páginas; Claude en la programación, la arquitectura y la lógica del sistema de memoria. El humano detrás del proyecto aportó la visión, las ideas, las decisiones de diseño y todo lo que ninguna IA podía hacer sola.
+Una demostración práctica de cómo se puede construir algo complejo colaborando con modelos de lenguaje desde cero.
+
+📋 Licencia
+Uso personal y no comercial. Ver LICENSE para más detalle.
+
 # Carpeta `data/`
 
 Esta carpeta contiene los datos de configuración y personajes. **No se sube al repo** (ver `.gitignore`), excepto los archivos de ejemplo y el personaje por defecto.
