@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0c0c0f">
+    <title>Cargando...</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        // Definida aquí para que esté disponible antes de que cargue script.js
+        // Los atributos onerror del HTML la necesitan desde el primer render
+        function handleImageError(img) {
+            img.style.display = 'none';
+            var fallback = img.nextElementSibling;
+            if (fallback && (fallback.classList.contains('avatar-fallback') ||
+                             fallback.classList.contains('header-avatar-fallback') ||
+                             fallback.classList.contains('sidebar-avatar-fallback'))) {
+                fallback.style.display = 'flex';
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Fondo de escenario con tinte de color borroso -->
+    <div id="sceneBg" style="
+        position:fixed;inset:0;z-index:0;pointer-events:none;
+        transition:background-color 1.4s ease, opacity 0.9s ease;
+        background-color:transparent;opacity:0"></div>
+    
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- SIDEBAR CON INFO -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- Overlay para cerrar sidebar tocando afuera en mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 id="sidebarTitle">Lo que el personaje sabe</h3>
+            <button id="closeSidebar" class="close-btn sidebar-close-btn">✕</button>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="sidebar-avatar-section">
+                <a href="/editar_personaje" class="sidebar-avatar sidebar-avatar-clickable" id="sidebarAvatarBtn" title="Editar personaje" style="display:block;text-decoration:none">
+                    <img src="" alt="" id="sidebarHiroImage">
+                    <div class="sidebar-avatar-fallback" id="sidebarHiroFallback">?</div>
+                    <div class="sidebar-avatar-overlay">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </div>
+                </a>
+                <div class="sidebar-avatar-name" id="sidebarPersonajeName">...</div>
+                <div class="sidebar-avatar-status">
+                    <span class="status-dot"></span>
+                    En línea
+                </div>
+            </div>
+
+            <div class="sidebar-nav-buttons">
+                <a href="/sobre_vos" class="sidebar-nav-btn sidebar-nav-btn--primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Sobre vos
+                </a>
+                <a href="/editar_personaje" class="sidebar-nav-btn sidebar-nav-btn--secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Editar personaje
+                </a>
+                <a href="/escenarios" class="sidebar-nav-btn sidebar-nav-btn--secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    Escenarios
+                </a>
+                <a href="/eventos" class="sidebar-nav-btn sidebar-nav-btn--secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Eventos
+                </a>
+                <a href="/objetos" class="sidebar-nav-btn sidebar-nav-btn--secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    Objetos
+                </a>
+                <a href="/expresiones" class="sidebar-nav-btn sidebar-nav-btn--secondary">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+    </svg>
+    Expresiones
+</a>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- MENÚ DE CONFIGURACIÓN — 3 categorías -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="settings-dropdown" id="settingsDropdown">
+        <button class="smenu-opt" onclick="abrirPanel('configuracion')">
+            <span class="smenu-opt-left">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"></path>
+                </svg>
+                Configuración
+            </span>
+            <svg class="smenu-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <button class="smenu-opt" onclick="abrirPanel('mensajes')">
+            <span class="smenu-opt-left">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Mensajes
+            </span>
+            <svg class="smenu-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <button class="smenu-opt" onclick="abrirPanel('personajes')">
+            <span class="smenu-opt-left">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Personajes
+            </span>
+            <svg class="smenu-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- PANEL: CONFIGURACIÓN -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="smenu-panel" id="panelConfiguracion">
+        <div class="smenu-panel-header">
+            <span>Configuración</span>
+            <button class="smenu-panel-close" onclick="cerrarPaneles()" title="Cerrar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="smenu-panel-body">
+            <div class="smenu-panel-section-label"> <!-- Apariencia --> </div>
+            <button id="personalizarChatBtn" class="smenu-panel-btn" onclick="abrirPersonalizarChat()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"></path>
+                </svg>
+                🎨 Personalizar chat
+            </button>
+            <button class="smenu-panel-btn" onclick="window.location.href='/api_manager'">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"></path>
+    </svg>
+    ⚙️ Gestor de APIs
+</button>
+        </div>
+        <div class="smenu-panel-footer">
+            <!--  <button class="smenu-footer-btn smenu-footer-btn--ghost" onclick="guardarColoresChat('general')">
+                Guardar en general
+            </button>
+            <button class="smenu-footer-btn smenu-footer-btn--accent" onclick="guardarColoresChat('personaje')">
+                Guardar para este chat
+            </button> -->
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- PANEL: MENSAJES -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="smenu-panel" id="panelMensajes">
+        <div class="smenu-panel-header">
+            <span>Mensajes</span>
+            <button class="smenu-panel-close" onclick="cerrarPaneles()" title="Cerrar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="smenu-panel-body">
+            <button id="buscarMensajesBtn" class="smenu-panel-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Buscar mensaje
+            </button>
+            <button id="destacadosBtn" class="smenu-panel-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                Ver mensajes destacados
+            </button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- PANEL: PERSONAJES -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="smenu-panel" id="panelPersonajes">
+        <div class="smenu-panel-header">
+            <span>Personajes</span>
+            <button class="smenu-panel-close" onclick="cerrarPaneles()" title="Cerrar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="smenu-panel-body">
+            <button id="crearPersonajeBtn" class="smenu-panel-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M20 21a8 8 0 1 0-16 0"></path>
+                    <line x1="12" y1="14" x2="12" y2="20"></line>
+                    <line x1="9" y1="17" x2="15" y2="17"></line>
+                </svg>
+                Crear personaje
+            </button>
+            <button id="importarPersonajeBtn" class="smenu-panel-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Importar personaje
+            </button>
+            <div class="smenu-panel-section-label" style="margin-top:14px">Personajes disponibles</div>
+            <div id="panelListaPersonajes" class="smenu-personajes-lista">
+                <p class="smenu-lista-cargando">Cargando...</p>
+            </div>
+        </div>
+        <div class="smenu-panel-footer">
+            <button class="smenu-footer-btn smenu-footer-btn--ghost" onclick="cerrarPaneles()">
+                Cancelar
+            </button>
+            <button class="smenu-footer-btn smenu-footer-btn--accent" onclick="aplicarPersonajeSeleccionado()">
+                Aceptar
+            </button>
+        </div>
+    </div>
+
+    <!-- Botones de compatibilidad JS (ocultos, mantienen event listeners existentes) -->
+    <div style="display:none" aria-hidden="true">
+        <button id="cambiarPersonajeBtn"></button>
+        <button id="objetosBtn"></button>
+        <button id="clearChatFromSettings"></button>
+        <button id="exportarChatBtn"></button>
+        <button id="exportarMemoriaBtn"></button>
+        <button id="importarChatBtn"></button>
+        <button id="importarMemoriaBtn"></button>
+    </div>
+
+    <!-- MODAL IMPORTAR PERSONAJE -->
+    <div id="modalImportar" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:440px">
+            <div class="modal-header">
+                <h3>Importar personaje</h3>
+                <button class="modal-cerrar" onclick="cerrarModalImportar()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);margin-bottom:16px;font-size:0.9rem">
+                    Seleccioná un archivo <strong>.json</strong> en formato chara_card_v2.
+                    Si el JSON no trae imagen, podés subir una por separado.
+                </p>
+                <div class="form-group">
+                    <label>Archivo JSON del personaje *</label>
+                    <input type="file" id="importJsonFile" accept=".json" style="
+                        width:100%;padding:8px;background:var(--bg-secondary);
+                        border:1px solid var(--border);border-radius:8px;
+                        color:var(--text-primary);cursor:pointer">
+                </div>
+                <div class="form-group" style="margin-top:12px">
+                    <label>Imagen de perfil (opcional)</label>
+                    <input type="file" id="importImageFile" accept="image/*" style="
+                        width:100%;padding:8px;background:var(--bg-secondary);
+                        border:1px solid var(--border);border-radius:8px;
+                        color:var(--text-primary);cursor:pointer">
+                </div>
+                <div id="importPreview" style="display:none;margin-top:16px;text-align:center">
+                    <img id="importPreviewImg" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">
+                    <div id="importPreviewNombre" style="margin-top:8px;font-weight:600"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModalImportar()">Cancelar</button>
+                <button class="btn-guardar" onclick="confirmarImportacion()">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR PERSONAJE -->
+    <div id="modalCambiar" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:440px">
+            <div class="modal-header">
+                <h3>Cambiar personaje</h3>
+                <button class="modal-cerrar" onclick="cerrarModalCambiar()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="listaPersonajes" style="display:flex;flex-direction:column;gap:10px">
+                    <p style="color:var(--text-secondary)">Cargando personajes...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModalCambiar()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botón de configuración (tres puntos) -->
+    <button id="settingsButton" class="settings-toggle" title="Configuración">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="12" cy="5" r="1"></circle>
+            <circle cx="12" cy="19" r="1"></circle>
+        </svg>
+    </button>
+    
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- HEADER -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left" id="openSidebar" style="cursor:pointer" title="Ver perfil">
+                <div class="header-avatar">
+                    <img src="" alt="" id="headerHiroImage">
+                    <div class="header-avatar-fallback" id="headerHiroFallback">?</div>
+                </div>
+                <div class="header-info">
+                    <h1 class="hiro-name" id="headerPersonajeName">Cargando...</h1>
+                    <span class="header-status">
+                        <span class="status-indicator">●</span>
+                        En línea
+                        <span class="header-modo-badge" id="headerModoBadge"></span>
+                        <span class="header-escenario-slot" id="headerEscenarioSlot" style="display:none">
+                            <span class="header-modo-badge" 
+                            <span class="header-modo-divider">·</span>
+                            <span id="headerEscenarioNombre"></span>
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="days-counter" id="daysCounter">Día 1</span>
+            </div>
+        </div>
+      
+    </div>
+
+    <!-- WIDGET EXPRESIÓN: hermano del header, ocupa su propio espacio en el flex -->
+    <div id="expresionWidget" class="expresion-widget">
+        <button class="expresion-toggle" id="expresionToggle"
+                onclick="toggleExpresion()" title="Ver expresión del personaje">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="7 13 12 18 17 13"></polyline>
+                <polyline points="7 6 12 11 17 6"></polyline>
+            </svg>
+        </button>
+        <div class="expresion-panel" id="expresionPanel">
+            <img id="expresionImg" alt="Expresión" onclick="toggleExpresion()" style="display:none">
+            <div id="expresionSinImg" class="expresion-sin-img" style="display:none">Sin img</div>
+            <div id="expresionNombre" class="expresion-nombre"></div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- CHAT AREA -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="chat-container" id="chatContainer">
+        <!-- El mensaje de bienvenida se genera dinámicamente en JS -->
+
+        <!-- TYPING INDICATOR dentro del chat para que fluya con los mensajes -->
+        <div class="typing-indicator message-wrapper hiro-message" id="typingIndicator" style="display:none;">
+            <div class="avatar">
+                <img src="" alt="" class="avatar-image">
+                <div class="avatar-fallback">?</div>
+            </div>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- INPUT AREA -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="input-area">
+        <div class="input-container">
+            <textarea 
+                id="messageInput" 
+                class="message-input" 
+                placeholder="Escribe tu mensaje..."
+                rows="1"
+            ></textarea>
+            <button id="sendButton" class="send-button" title="Enviar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+            <button id="stopButton" class="send-button" title="Detener generación" onclick="stopGeneration()"
+                style="display:none;background:#7f1d1d;border-color:#ef4444;color:#fca5a5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL OBJETOS -->\n    <div id="modalObjetos" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:540px">
+            <div class="modal-header">
+                <h3>📦 Objetos</h3>
+                <button class="modal-cerrar" onclick="cerrarModalObjetos()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px">
+                    Los objetos activos son conocidos por el personaje: sus propiedades, quién los tiene y cómo usarlos.
+                </p>
+                <div id="listaObjetos" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+                <div style="border-top:1px solid var(--border);padding-top:16px">
+                    <div style="font-family:monospace;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:10px">Nuevo objeto</div>
+                    <input type="text" id="nuevo-objeto-nombre" placeholder="Nombre (ej: Vara mágica, Pistola, Poción)" style="
+                        width:100%;padding:9px 12px;background:var(--bg-secondary);
+                        border:1px solid var(--border);border-radius:8px;
+                        color:var(--text-primary);font-size:0.95rem;margin-bottom:8px;outline:none;box-sizing:border-box">
+                    <textarea id="nuevo-objeto-desc" rows="2" placeholder="Tu idea o descripción del objeto..." style="
+                        width:100%;padding:9px 12px;background:var(--bg-secondary);
+                        border:1px solid var(--border);border-radius:8px;
+                        color:var(--text-primary);font-size:0.95rem;resize:vertical;outline:none;margin-bottom:8px;box-sizing:border-box"></textarea>
+                    <textarea id="nuevo-objeto-props" rows="3" placeholder="Propiedades: qué puede hacer, sus reglas, sus límites..." style="
+                        width:100%;padding:9px 12px;background:var(--bg-secondary);
+                        border:1px solid var(--border);border-radius:8px;
+                        color:var(--text-primary);font-size:0.95rem;resize:vertical;outline:none;margin-bottom:8px;box-sizing:border-box"></textarea>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                        <span style="font-size:0.85rem;color:var(--text-secondary);white-space:nowrap">Poseedor:</span>
+                        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.9rem">
+                            <input type="radio" name="nuevo-obj-poseedor" value="usuario" checked> Usuario
+                        </label>
+                        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.9rem">
+                            <input type="radio" name="nuevo-obj-poseedor" value="personaje"> Personaje
+                        </label>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <button id="btn-generar-objeto" onclick="generarObjetoIA()" style="
+                            padding:9px 18px;background:var(--accent-dim);
+                            color:var(--accent);border:1px solid var(--accent);border-radius:8px;cursor:pointer;
+                            font-family:monospace;font-size:0.78rem;font-weight:600">
+                            ✨ Generar con IA
+                        </button>
+                        <button onclick="crearObjeto()" style="
+                            padding:9px 18px;background:var(--accent);
+                            color:#0a0a0d;border:none;border-radius:8px;cursor:pointer;
+                            font-family:monospace;font-size:0.78rem;font-weight:600">
+                            + Guardar objeto
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModalObjetos()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BUSCAR MENSAJES -->
+    <div id="modalBuscar" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:520px;max-height:82vh;display:flex;flex-direction:column">
+            <div class="modal-header">
+                <h3>Buscar mensajes</h3>
+                <button class="modal-cerrar" onclick="document.getElementById('modalBuscar').style.display='none'">×</button>
+            </div>
+            <div class="modal-body" style="display:flex;flex-direction:column;flex:1;min-height:0">
+                <input type="text" id="buscarInput" placeholder="Escribí para buscar en el chat..."
+                    autocomplete="off"
+                    style="width:100%;padding:9px 12px;background:var(--bg-secondary);
+                    border:1px solid var(--border);border-radius:8px;color:var(--text-primary);
+                    font-size:0.95rem;outline:none;margin-bottom:12px;flex-shrink:0"
+                    oninput="buscarMensajes()">
+                <div id="buscarResultados" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px;padding-right:2px">
+                    <p style="color:var(--text-secondary);font-size:0.85rem">Escribí algo para buscar...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-guardar" onclick="document.getElementById('modalBuscar').style.display='none'">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MENSAJES DESTACADOS -->
+    <div id="modalDestacados" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:520px;max-height:82vh;display:flex;flex-direction:column">
+            <div class="modal-header">
+                <h3>⭐ Mensajes destacados</h3>
+                <button class="modal-cerrar" onclick="document.getElementById('modalDestacados').style.display='none'">×</button>
+            </div>
+            <div class="modal-body" style="overflow-y:auto;flex:1">
+                <div id="listaDestacados">
+                    <p style="color:var(--text-secondary);font-size:0.85rem">Todavía no hay mensajes destacados. Abrí el menú ⋮ de cualquier mensaje y elegí ⭐ Destacar.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-guardar" onclick="document.getElementById('modalDestacados').style.display='none'">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IMPORTAR CHAT -->
+    <div id="modalImportarChat" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:420px">
+            <div class="modal-header">
+                <h3>Importar chat</h3>
+                <button class="modal-cerrar" onclick="cerrarModalImportarChat()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-soft);font-size:0.88rem;margin-bottom:16px;line-height:1.6">
+                    Seleccioná un archivo <strong>.json</strong> exportado previamente.
+                    Los mensajes se <strong>añaden</strong> al chat actual sin borrar nada.
+                </p>
+                <div class="form-group">
+                    <label>Archivo de chat (.json)</label>
+                    <input type="file" id="importChatFile" accept=".json"
+                        style="width:100%;padding:8px;background:var(--bg-elevated);
+                               border:1px solid var(--border-soft);border-radius:8px;
+                               color:var(--text-main);cursor:pointer">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModalImportarChat()">Cancelar</button>
+                <button class="btn-guardar" onclick="confirmarImportarChat()">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IMPORTAR MEMORIA -->
+    <div id="modalImportarMemoria" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:420px">
+            <div class="modal-header">
+                <h3>Importar memoria</h3>
+                <button class="modal-cerrar" onclick="cerrarModalImportarMemoria()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-soft);font-size:0.88rem;margin-bottom:16px;line-height:1.6">
+                    Seleccioná un archivo <strong>.json</strong> de memoria exportado previamente.
+                    Los hechos existentes se <strong>actualizan</strong>, los nuevos se añaden.
+                </p>
+                <div class="form-group">
+                    <label>Archivo de memoria (.json)</label>
+                    <input type="file" id="importMemoriaFile" accept=".json"
+                        style="width:100%;padding:8px;background:var(--bg-elevated);
+                               border:1px solid var(--border-soft);border-radius:8px;
+                               color:var(--text-main);cursor:pointer">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModalImportarMemoria()">Cancelar</button>
+                <button class="btn-guardar" onclick="confirmarImportarMemoria()">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PERSONALIZAR CHAT -->
+    <div id="modalPersonalizarChat" class="modal-overlay" style="display:none">
+        <div class="modal-contenido" style="max-width:460px">
+            <div class="modal-header">
+                <h3>🎨 Personalizar chat</h3>
+                <button class="modal-cerrar" onclick="cerrarPersonalizarChat()">×</button>
+            </div>
+            <div class="modal-body" style="display:flex;flex-direction:column;gap:20px">
+
+                <!-- Burbujas IA -->
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-soft);margin-bottom:10px">Burbuja del personaje</div>
+                    <div style="display:flex;gap:12px;align-items:center">
+                        <div style="flex:1">
+                            <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:4px">Fondo</div>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <input type="color" id="pc-ia-bg" value="#1a1230"
+                                    style="width:40px;height:36px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px">
+                                <div id="pc-ia-bg-preview" style="flex:1;height:36px;border-radius:8px;border:1px solid var(--accent);padding:0 10px;display:flex;align-items:center">
+                                    <span style="font-size:0.75rem;font-family:var(--font-mono)">Personaje...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex:1">
+                            <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:4px">Borde</div>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <input type="color" id="pc-ia-border" value="#c9a84c"
+                                    style="width:40px;height:36px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px">
+                                <div id="pc-ia-border-preview" style="flex:1;height:36px;border-radius:8px;border:2px solid var(--accent);padding:0 10px;display:flex;align-items:center">
+                                    <span style="font-size:0.75rem;font-family:var(--font-mono)">borde...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px">
+                        <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:4px">Texto</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <input type="color" id="pc-ia-text" value="#f0f0f5"
+                                style="width:40px;height:36px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px">
+                            <span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">Color del texto dentro de la burbuja del personaje</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Burbujas usuario -->
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-soft);margin-bottom:10px">Burbuja del usuario</div>
+                    <div style="display:flex;gap:12px;align-items:center">
+                        <div style="flex:1">
+                            <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:4px">Fondo</div>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <input type="color" id="pc-user-bg" value="#1c1c24"
+                                    style="width:40px;height:36px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px">
+                                <div id="pc-user-bg-preview" style="flex:1;height:36px;border-radius:8px;border:1px solid #2e2e3e;padding:0 10px;display:flex;align-items:center">
+                                    <span style="font-size:0.75rem;font-family:var(--font-mono)">Usuario...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex:1">
+                            <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:4px">Borde</div>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <input type="color" id="pc-user-border" value="#2e2e3e"
+                                    style="width:40px;height:36px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px">
+                                <div id="pc-user-border-preview" style="flex:1;height:36px;border-radius:8px;border:2px solid #2e2e3e;padding:0 10px;display:flex;align-items:center">
+                                    <span style="font-size:0.75rem;font-family:var(--font-mono)">borde...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px">
+                        <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:4px">Texto</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <input type="color" id="pc-user-text" value="#c8c8d8"
+                                style="width:40px;height:36px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px">
+                            <span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">Color del texto dentro de la burbuja del usuario</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formato del texto del personaje -->
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-soft);margin-bottom:10px">Formato del texto</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <input type="color" id="pc-fmt-dialogue" value="#f0f0f5"
+                                style="width:40px;height:34px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px;flex-shrink:0">
+                            <div style="flex:1;height:34px;border-radius:8px;border:1px solid var(--border-soft);background:var(--bg-elevated);padding:0 12px;display:flex;align-items:center">
+                                <span id="pc-fmt-dialogue-preview" style="font-family:var(--font-serif);font-size:0.9rem;color:#f0f0f5">"Diálogo hablado"</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <input type="color" id="pc-fmt-action" value="#8888a0"
+                                style="width:40px;height:34px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px;flex-shrink:0">
+                            <div style="flex:1;height:34px;border-radius:8px;border:1px solid var(--border-soft);background:var(--bg-elevated);padding:0 12px;display:flex;align-items:center">
+                                <span id="pc-fmt-action-preview" style="font-family:var(--font-serif);font-size:0.9rem;font-style:italic;color:#8888a0">*Acciones y sentimientos*</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <input type="color" id="pc-fmt-thought" value="#55556a"
+                                style="width:40px;height:34px;border:1px solid var(--border-soft);background:none;cursor:pointer;border-radius:6px;padding:2px;flex-shrink:0">
+                            <div style="flex:1;height:34px;border-radius:8px;border:1px solid var(--border-soft);background:var(--bg-elevated);padding:0 12px;display:flex;align-items:center">
+                                <span id="pc-fmt-thought-preview" style="font-family:var(--font-serif);font-size:0.9rem;font-style:italic;color:#55556a">((Pensamientos internos))</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color de acento -->
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-soft);margin-bottom:10px">Color de acento</div>
+                    <div class="color-picker" style="gap:8px">
+                        <button class="color-option" data-color="gold"   title="Dorado">  <div class="color-preview" style="background:#c9a84c"></div></button>
+                        <button class="color-option" data-color="blue"   title="Azul">    <div class="color-preview" style="background:#4a9eff"></div></button>
+                        <button class="color-option" data-color="purple" title="Púrpura"> <div class="color-preview" style="background:#a855f7"></div></button>
+                        <button class="color-option" data-color="indigo" title="Índigo">  <div class="color-preview" style="background:#6366f1"></div></button>
+                        <button class="color-option" data-color="green"  title="Verde">   <div class="color-preview" style="background:#10b981"></div></button>
+                        <button class="color-option" data-color="teal"   title="Teal">    <div class="color-preview" style="background:#14b8a6"></div></button>
+                        <button class="color-option" data-color="cyan"   title="Cian">    <div class="color-preview" style="background:#06b6d4"></div></button>
+                        <button class="color-option" data-color="red"    title="Rojo">    <div class="color-preview" style="background:#ef4444"></div></button>
+                        <button class="color-option" data-color="rose"   title="Rosa">    <div class="color-preview" style="background:#f43f5e"></div></button>
+                        <button class="color-option" data-color="orange" title="Naranja"> <div class="color-preview" style="background:#f97316"></div></button>
+                        <button class="color-option" data-color="slate"  title="Plata">   <div class="color-preview" style="background:#94a3b8"></div></button>
+                    </div>
+                </div>
+
+                <!-- Nota informativa -->
+                <p style="font-size:0.78rem;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5;margin:0">
+                    💡 «Guardar para este chat» aplica solo al personaje activo. «Guardar en general» se usa cuando un personaje no tiene colores propios.
+                </p>
+            </div>
+            <div class="modal-footer" style="gap:8px;flex-wrap:wrap">
+                <button class="btn-cancelar" onclick="cerrarPersonalizarChat()">Cancelar</button>
+                <button class="btn-guardar" style="background:var(--bg-elevated);border:1px solid var(--border-soft);color:var(--text-main);" onclick="guardarColoresChat('general')">Guardar en general</button>
+                <button class="btn-guardar" onclick="guardarColoresChat('personaje')">Guardar para este chat</button>
+            </div>
+        </div>
+    </div>
+      <!-- ════════════════════════════════════════════════════════ -->
+    <!-- WIDGET EXPRESIÓN — se pega al borde inferior del header -->
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>

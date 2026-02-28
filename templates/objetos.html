@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0c0c0f">
+    <title>Objetos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        :root {
+            --bg-primary: #0c0c0f;
+            --bg-secondary: #1a1a20;
+            --bg-tertiary: #25252c;
+            --border: #2e2e38;
+            --border-hover: #4a4a5a;
+            --text-primary: #f2f2f5;
+            --text-secondary: #9ba1a6;
+            --accent: #d4af37;
+            --accent-dim: rgba(212, 175, 55, 0.1);
+            --danger: #ef4444;
+            --font-main: 'Crimson Pro', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        html, body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto !important;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .page-container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 60px 24px 60px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+            transform: translateX(-2px);
+        }
+
+        .page-title { font-size: 1.75rem; font-weight: 600; margin: 0; }
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin: 0 0 28px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* ── Contador de activos ─────────────────────────────────────────────── */
+        .activos-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 24px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .activos-label {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .activos-dots {
+            display: flex;
+            gap: 8px;
+        }
+        .activo-dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            transition: all 0.25s;
+        }
+        .activo-dot.lleno {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 6px var(--accent-dim);
+        }
+        .activos-aviso {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--danger);
+            display: none;
+        }
+        .activos-aviso.visible { display: block; }
+
+        /* ── Section label ───────────────────────────────────────────────────── */
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── Lista ───────────────────────────────────────────────────────────── */
+        #listaObjetos {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-objeto {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .card-objeto:hover { border-color: var(--border-hover); }
+        .card-objeto.activo {
+            border-color: var(--accent);
+            box-shadow: 0 0 14px var(--accent-dim);
+        }
+        .card-objeto.activo-usuario { --obj-color: #60a5fa; }
+        .card-objeto.activo-personaje { --obj-color: #f59e0b; }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .obj-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
+        .obj-info { flex: 1; min-width: 0; }
+
+        .obj-nombre {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .badge-poseedor {
+            font-size: 0.68rem;
+            font-family: var(--font-mono);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s;
+            border: 1px solid;
+        }
+        .badge-poseedor.usuario {
+            background: rgba(96,165,250,0.12);
+            border-color: #60a5fa44;
+            color: #60a5fa;
+        }
+        .badge-poseedor.usuario:hover {
+            background: rgba(96,165,250,0.25);
+            border-color: #60a5fa;
+        }
+        .badge-poseedor.personaje {
+            background: rgba(245,158,11,0.12);
+            border-color: #f59e0b44;
+            color: #f59e0b;
+        }
+        .badge-poseedor.personaje:hover {
+            background: rgba(245,158,11,0.25);
+            border-color: #f59e0b;
+        }
+
+        .badge-activo-pill {
+            font-size: 0.65rem;
+            font-family: var(--font-mono);
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .obj-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .obj-props {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-style: italic;
+            line-height: 1.4;
+            border-left: 2px solid var(--border);
+            padding-left: 8px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+            align-items: flex-start;
+        }
+
+        /* ── Estado (barra inferior editable) ─────────────────────────────── */
+        .card-estado {
+            padding: 10px 16px;
+            background: rgba(0,0,0,0.25);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .estado-label {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            flex-shrink: 0;
+        }
+        .estado-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 2px 4px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .estado-input:focus { border-bottom-color: var(--accent); }
+        .estado-input::placeholder { color: #444; }
+        .btn-estado-save {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .btn-estado-save:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── Botones ─────────────────────────────────────────────────────────── */
+        .btn-toggle {
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-toggle.desactivado {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        .btn-toggle.desactivado:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+        .btn-toggle.activado {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .btn-toggle.activado:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-accion {
+            background: var(--bg-tertiary);
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 6px;
+            transition: all 0.18s;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+        .btn-accion:hover {
+            border-color: var(--border);
+            color: var(--text-primary);
+        }
+        .btn-delete {
+            background: var(--bg-tertiary);
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px 7px;
+            border-radius: 6px;
+            transition: all 0.18s;
+            display: flex;
+            align-items: center;
+        }
+        .btn-delete:hover {
+            color: var(--danger);
+            background: rgba(239,68,68,0.1);
+        }
+
+        /* ── Formulario ──────────────────────────────────────────────────────── */
+        .divider { border: none; height: 1px; background: var(--border); margin: 32px 0; }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+            transition: all 0.2s;
+        }
+        .form-input::placeholder { color: #555566; }
+        .form-input:focus {
+            border-color: var(--accent);
+            background: var(--bg-tertiary);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+        textarea.form-input { resize: vertical; min-height: 72px; }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .form-row .form-input { margin-bottom: 0; }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .btn-ia, .btn-guardar {
+            padding: 11px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            flex: 1;
+        }
+        .btn-ia {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        .btn-ia:hover:not(:disabled) { background: var(--accent); color: var(--bg-primary); }
+        .btn-ia:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-guardar {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: 1px solid var(--accent);
+        }
+        .btn-guardar:hover { background: #e6c555; transform: translateY(-1px); }
+
+        /* ── Modal editar ────────────────────────────────────────────────────── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 20px;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 9px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            transition: all 0.18s;
+        }
+        .btn-cancel:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+        .btn-save {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            padding: 9px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.18s;
+        }
+        .btn-save:hover { background: #e6c555; }
+        .form-label {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        @media (max-width: 500px) {
+            .page-container { padding: 40px 16px 40px; }
+            .card-top { flex-direction: column; gap: 10px; }
+            .card-actions { width: 100%; justify-content: flex-start; }
+            .action-buttons, .form-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="page-container">
+
+    <div class="page-header">
+        <a href="/" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Volver
+        </a>
+        <h1 class="page-title">Objetos</h1>
+    </div>
+
+    <p class="page-subtitle">
+        Los objetos activos se inyectan en el contexto del personaje durante el chat. Máximo 3 a la vez. El poseedor determina quién puede usarlos.
+    </p>
+
+    <!-- Contador de activos -->
+    <div class="activos-bar">
+        <div>
+            <div class="activos-label">Objetos activos en escena</div>
+            <div class="activos-aviso" id="avisoLimite">⚠ Límite alcanzado — desactivá uno antes de activar otro</div>
+        </div>
+        <div class="activos-dots">
+            <div class="activo-dot" id="dot1"></div>
+            <div class="activo-dot" id="dot2"></div>
+            <div class="activo-dot" id="dot3"></div>
+        </div>
+    </div>
+
+    <!-- Lista de objetos -->
+    <div class="section-label">Inventario</div>
+    <div id="listaObjetos"></div>
+
+    <!-- Formulario nuevo objeto -->
+    <hr class="divider">
+    <div class="section-label">Nuevo objeto</div>
+
+    <input type="text" id="nuevo-obj-nombre" class="form-input"
+        placeholder="Nombre (ej: Revólver oxidado, Carta sellada, Llave maestra)">
+
+    <textarea id="nuevo-obj-desc" class="form-input" rows="2"
+        placeholder="Tu idea — cómo se ve, de dónde viene, qué lo hace especial..."></textarea>
+
+    <textarea id="nuevo-obj-props" class="form-input" rows="2"
+        placeholder="Propiedades / reglas para la IA (se generan automáticamente con IA)..."></textarea>
+
+    <div class="form-row">
+        <select id="nuevo-obj-poseedor" class="form-input" style="flex:1">
+            <option value="usuario">👤 Poseedor: Usuario</option>
+            <option value="personaje">🤖 Poseedor: Personaje</option>
+        </select>
+        <input type="text" id="nuevo-obj-estado" class="form-input" style="flex:2"
+            placeholder="Estado inicial (ej: cargado con 6 balas)">
+    </div>
+
+    <div class="action-buttons">
+        <button id="btn-generar-obj" class="btn-ia" onclick="generarObjetoIA()">
+            ✨ Generar con IA
+        </button>
+        <button class="btn-guardar" onclick="crearObjeto()">
+            + Guardar objeto
+        </button>
+    </div>
+
+</div>
+
+<!-- Modal editar -->
+<div id="modalEditar" class="modal-overlay" onclick="if(event.target===this)cerrarModal()">
+    <div class="modal-box">
+        <h2 class="modal-title">✎ Editar objeto</h2>
+
+        <label class="form-label">Nombre</label>
+        <input type="text" id="edit-nombre" class="form-input">
+
+        <label class="form-label">Descripción</label>
+        <textarea id="edit-desc" class="form-input" rows="2"></textarea>
+
+        <label class="form-label">Propiedades / reglas para la IA</label>
+        <textarea id="edit-props" class="form-input" rows="3"></textarea>
+
+        <label class="form-label">Estado actual</label>
+        <input type="text" id="edit-estado" class="form-input"
+            placeholder="(vacío = sin estado especial)">
+
+        <label class="form-label">Poseedor</label>
+        <select id="edit-poseedor" class="form-input">
+            <option value="usuario">👤 Usuario</option>
+            <option value="personaje">🤖 Personaje</option>
+        </select>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn-save" id="btn-guardar-edit" onclick="guardarEdicion()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/script_objetos.js"></script>
+</body>
+</html>

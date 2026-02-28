@@ -1,0 +1,63 @@
+{
+  "mistral": {
+    "enabled": false,
+    "apiKey": "",
+    "endpoint": "https://api.mistral.ai/v1",
+    "rpmLimit": 30
+  },
+  "openrouter": {
+    "enabled": false,
+    "apiKey": "",
+    "rpmLimit": 60
+  },
+  "openai": {
+    "enabled": false,
+    "apiKey": "",
+    "endpoint": "https://api.openai.com/v1",
+    "rpmLimit": 60
+  },
+  "cohere": {
+    "enabled": false,
+    "apiKey": "",
+    "rpmLimit": 100
+  },
+  "jina": {
+    "enabled": false,
+    "apiKey": "",
+    "rpmLimit": 60
+  },
+  "ollama": {
+    "enabled": false,
+    "endpoint": "http://localhost:11434",
+    "rpmLimit": 999
+  },
+  "models": {
+    "chat": "mistral-large-latest",
+    "embeddings": "mistral-embed",
+    "embedding_provider": "mistral",
+    "extraction": "mistral-small-latest",
+    "synthesis": "mistral-small-latest",
+    "generation": "mistral-small-latest",
+    "enrichment": "mistral-small-latest"
+  },
+  "nsfw": {
+    "detectionEnabled": false,
+    "sensitivity": 3,
+    "autoSwitch": true,
+    "logging": true
+  },
+  "fallback": {
+    "enabled": true,
+    "primaryProvider": "mistral",
+    "secondaryProvider": "openrouter",
+    "retryEnabled": true,
+    "retryAttempts": 3
+  },
+  "queueEnabled": true,
+  "search": {
+    "enabled": false,
+    "serpapi_key": "",
+    "brave_key": "",
+    "tavily_key": ""
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "modelos": [],
+  "asignaciones": {
+    "chat": null,
+    "small": null,
+    "embeddings": null,
+    "extraccion": null,
+    "sintesis": null,
+    "enriquecimiento": null
+  },
+  "version": 1
+}

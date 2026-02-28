@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#050507">
+    <title>Expresiones - Panel Inmersivo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #050507;
+            --bg-surface: #101014;
+            --bg-surface-hover: #18181e;
+            --bg-elevated: #1a1a21;
+            --accent: #EBB34B;
+            --accent-dim: rgba(235, 179, 75, 0.15);
+            --accent-glow: rgba(235, 179, 75, 0.4);
+            --text-primary: #F2F2F5;
+            --text-secondary: #9E9EA8;
+            --text-muted: #6B6B76;
+            --border: #23232C;
+            --border-light: #30303A;
+            --danger: #ef4444;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --font-serif: 'Crimson Pro', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.6);
+            --shadow-glow: 0 0 15px var(--accent-glow);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-base);
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(235,179,75,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(255,255,255,0.02) 0%, transparent 50%);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page-container { max-width: 680px; margin: 0 auto; padding: 30px 16px 80px; }
+
+        .page-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 24px; animation: fadeInDown 0.5s ease-out; flex-wrap: wrap;
+        }
+
+        .page-title {
+            font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin: 0;
+            background: linear-gradient(to right, #fff, var(--text-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem; color: var(--text-secondary);
+            margin: 0 0 24px; line-height: 1.6; font-weight: 300;
+        }
+
+        .section-label {
+            font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-label::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(to right, var(--border), transparent);
+        }
+
+        /* ── TARJETAS ── */
+        .card-expresion {
+            background: var(--bg-surface); border-radius: 12px;
+            border: 1px solid var(--border); overflow: hidden;
+            margin-bottom: 12px; transition: all 0.3s cubic-bezier(0.2,0.8,0.2,1);
+            animation: fadeInUp 0.3s ease-out;
+        }
+        .card-expresion.es-default { border-color: var(--accent); box-shadow: var(--shadow-glow); }
+
+        .card-inner { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+
+        .card-top { display: flex; gap: 14px; align-items: flex-start; width: 100%; }
+
+        .expr-thumb {
+            width: 68px; height: 68px; border-radius: 10px; border: 1px solid var(--border-light);
+            background: var(--bg-elevated); flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .expr-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .expr-thumb-placeholder { font-size: 1.8rem; opacity: 0.35; }
+
+        .card-info { flex: 1; min-width: 0; }
+        .card-nombre {
+            font-weight: 500; font-size: 1rem; margin-bottom: 6px;
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+        .badge-default {
+            font-size: 0.62rem; color: var(--bg-base); background: var(--accent);
+            padding: 2px 8px; border-radius: 12px; font-weight: 600;
+            font-family: var(--font-mono); letter-spacing: 0.04em;
+        }
+        .patron-tag {
+            display: inline-block; background: var(--bg-elevated);
+            border: 1px solid var(--border-light); border-radius: 6px;
+            padding: 2px 8px; margin: 2px 3px 2px 0;
+            font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary);
+        }
+
+        .card-actions {
+            display: flex; gap: 8px; padding-top: 10px;
+            border-top: 1px solid var(--border-light);
+        }
+        .btn-accion, .btn-delete {
+            flex: 1; padding: 10px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg-elevated); border: 1px solid var(--border);
+            color: var(--text-secondary); border-radius: 8px;
+            cursor: pointer; transition: all 0.2s; font-size: 0.82rem; gap: 6px;
+        }
+        .btn-accion:active { background: var(--border); }
+        .btn-delete { color: #ef4444; border-color: rgba(239,68,68,0.25); }
+        .btn-delete:active { background: rgba(239,68,68,0.15); }
+        .btn-accion.btn-default-activo { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+
+        /* ── BOTONES ── */
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            color: var(--text-secondary); border-radius: 10px; padding: 10px 16px;
+            cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem;
+            text-decoration: none; transition: all 0.2s; height: 44px; box-sizing: border-box;
+        }
+
+        .btn-guardar {
+            width: 100%; padding: 12px 20px; border-radius: 8px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 600; height: 48px; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--accent); color: var(--bg-base); border: none;
+            box-shadow: 0 4px 12px rgba(235,179,75,0.2); transition: all 0.2s;
+        }
+        .btn-guardar:hover { opacity: 0.88; }
+        .btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── FORMULARIO ── */
+        .form-container {
+            background: var(--bg-surface); padding: 20px 16px;
+            border-radius: 16px; border: 1px solid var(--border); margin-top: 32px;
+        }
+        .form-input {
+            width: 100%; padding: 12px 14px; background: var(--bg-elevated);
+            border: 1px solid var(--border); border-radius: 10px;
+            color: var(--text-primary); font-size: 0.95rem; outline: none;
+            margin-bottom: 10px; box-sizing: border-box; font-family: inherit;
+            transition: border-color 0.2s; -webkit-appearance: none;
+        }
+        .form-input:focus { border-color: var(--accent); }
+        .form-label {
+            font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;
+            display: block; font-family: var(--font-mono); letter-spacing: 0.04em;
+        }
+
+        /* Upload */
+        .upload-area {
+            border: 2px dashed var(--border-light); border-radius: 12px;
+            padding: 20px; text-align: center; cursor: pointer;
+            transition: all 0.2s; margin-bottom: 12px;
+            background: var(--bg-elevated); position: relative; overflow: hidden;
+        }
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--accent); background: var(--accent-dim);
+        }
+        .upload-area input[type="file"] {
+            position: absolute; inset: 0; opacity: 0; cursor: pointer;
+            width: 100%; height: 100%;
+        }
+        .upload-preview { max-width: 100%; max-height: 150px; border-radius: 8px; object-fit: contain; display: none; }
+        .upload-text { color: var(--text-secondary); font-size: 0.88rem; }
+        .upload-subtext { color: var(--text-muted); font-size: 0.76rem; margin-top: 4px; }
+
+        /* Chips */
+        .patron-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .patron-input-row input {
+            flex: 1; padding: 10px 12px; background: var(--bg-elevated);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text-primary); font-size: 0.9rem; outline: none; font-family: var(--font-mono);
+        }
+        .patron-input-row input:focus { border-color: var(--accent); }
+        .btn-add-patron {
+            padding: 10px 14px; background: var(--accent-dim);
+            border: 1px solid var(--accent); color: var(--accent);
+            border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: 700;
+            transition: all 0.2s; white-space: nowrap; min-width: 44px;
+        }
+        .btn-add-patron:hover { background: var(--accent); color: var(--bg-base); }
+        .patrones-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; margin-bottom: 14px; }
+        .chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--bg-elevated); border: 1px solid var(--border-light);
+            border-radius: 20px; padding: 4px 10px;
+            font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);
+        }
+        .chip-del {
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; padding: 0; font-size: 1rem; line-height: 1; display: flex; align-items: center;
+        }
+        .chip-del:hover { color: var(--danger); }
+
+        /* Modales */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(5,5,7,0.85); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease; padding: 16px; box-sizing: border-box;
+        }
+        .modal-overlay.open { display: flex; opacity: 1; animation: fadeIn 0.3s ease forwards; }
+        .modal-contenido {
+            background: var(--bg-surface); border: 1px solid var(--border-light);
+            border-radius: 20px; box-shadow: var(--shadow-lg);
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.2,0.8,0.2,1);
+            overflow: hidden; width: 100%; max-width: 500px;
+            max-height: 90vh; display: flex; flex-direction: column;
+        }
+        .modal-overlay.open .modal-contenido { transform: translateY(0) scale(1); }
+        .modal-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-surface-hover); flex-shrink: 0;
+        }
+        .modal-header h3 { margin: 0; font-weight: 500; font-size: 1.05rem; }
+        .modal-cerrar {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 1.8rem; cursor: pointer; padding: 0 6px; line-height: 1; height: 40px;
+        }
+        .modal-body { padding: 20px; overflow-y: auto; }
+        .modal-footer {
+            padding: 16px 20px; border-top: 1px solid var(--border);
+            display: flex; flex-direction: column; gap: 10px;
+            background: var(--bg-surface-hover); flex-shrink: 0;
+        }
+        .btn-cancelar {
+            width: 100%; padding: 12px; background: transparent;
+            color: var(--text-secondary); border: 1px solid var(--border);
+            border-radius: 8px; cursor: pointer; height: 44px; box-sizing: border-box;
+        }
+
+        /* Notificación */
+        .notificacion {
+            position: fixed; bottom: 20px; left: 50%;
+            width: calc(100% - 32px); max-width: 400px;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--bg-elevated); color: var(--text-primary);
+            padding: 14px 20px; border-radius: 12px;
+            border: 1px solid var(--border-light); box-shadow: var(--shadow-lg);
+            font-size: 0.9rem; font-weight: 500; opacity: 0; z-index: 9999;
+            display: flex; align-items: center; gap: 10px; box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.2,0.8,0.2,1);
+        }
+        .notificacion.mostrar { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .notificacion-success { border-bottom: 3px solid #10b981; }
+        .notificacion-error   { border-bottom: 3px solid var(--danger); }
+
+        /* Empty */
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+        .empty-state-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.45; }
+        .empty-state-text { font-size: 0.92rem; line-height: 1.7; }
+
+        /* Anims */
+        @keyframes fadeInDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeInUp   { from { opacity:0; transform:translateY(8px); }  to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn     { from { opacity:0; } to { opacity:1; } }
+
+        /* Desktop */
+        @media (min-width: 600px) {
+            .page-container { padding: 60px 24px 80px; }
+            .page-title { font-size: 1.75rem; }
+            .form-container { padding: 24px; }
+            .card-inner { flex-direction: row; align-items: center; flex-wrap: nowrap; }
+            .card-top { flex: 1; }
+            .card-actions {
+                width: auto; padding-top: 0; border-top: none;
+                opacity: 0.5; transition: opacity 0.2s;
+            }
+            .card-expresion:hover .card-actions { opacity: 1; }
+            .btn-accion, .btn-delete { flex: none; width: 38px; height: 38px; padding: 6px; font-size: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <a href="/" class="back-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Volver
+        </a>
+        <h1 class="page-title">Expresiones</h1>
+    </div>
+
+    <p class="page-subtitle">
+        Asigná imágenes a cada expresión del personaje. Cuando su último mensaje contenga alguno de los patrones definidos, esa imagen se mostrará en el chat. Si ningún patrón coincide, se usa la expresión marcada como <strong>default</strong>.
+    </p>
+
+    <!-- LISTA EXISTENTE -->
+    <div class="section-label">Expresiones del personaje</div>
+    <div id="listaExpresiones">
+        <div class="empty-state">
+            <div class="empty-state-icon">😶</div>
+            <div class="empty-state-text">Cargando...</div>
+        </div>
+    </div>
+
+    <!-- FORMULARIO NUEVA -->
+    <div class="form-container">
+        <div class="section-label" style="margin-bottom:20px">Nueva expresión</div>
+
+        <label class="form-label">Nombre (ej: Enojado, Sonriente, Triste)</label>
+        <input type="text" id="nuevo-expr-nombre" class="form-input" placeholder="Nombre de la expresión">
+
+        <label class="form-label">Imagen</label>
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="nuevo-expr-imagen" accept="image/*" onchange="previsualizarImagen(this)">
+            <img id="upload-preview" class="upload-preview" src="" alt="preview">
+            <div id="upload-hint">
+                <div class="upload-text">📁 Tocá para subir imagen</div>
+                <div class="upload-subtext">PNG · JPG · GIF · WebP</div>
+            </div>
+        </div>
+
+        <label class="form-label">Patrones — palabras o frases que disparan esta expresión</label>
+        <div class="patron-input-row">
+            <input type="text" id="patron-input"
+                placeholder='Ej: te odio, estoy enojado...'
+                onkeydown="if(event.key==='Enter'){event.preventDefault();agregarPatron()}">
+            <button class="btn-add-patron" onclick="agregarPatron()" title="Agregar patrón">+</button>
+        </div>
+        <div class="patrones-chips" id="patrones-chips-nuevo"></div>
+
+        <label style="display:flex;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;font-size:0.88rem;color:var(--text-secondary)">
+            <input type="checkbox" id="nuevo-expr-default" style="width:16px;height:16px;accent-color:var(--accent)">
+            Marcar como expresión <strong style="color:var(--text-primary)">default</strong> (sin coincidencias)
+        </label>
+
+        <button class="btn-guardar" onclick="crearExpresion()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Guardar expresión
+        </button>
+    </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal-contenido">
+        <div class="modal-header">
+            <h3>✏️ Editar expresión</h3>
+            <button class="modal-cerrar" onclick="cerrarModalEditar()">×</button>
+        </div>
+        <div class="modal-body">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="edit-expr-nombre" class="form-input" placeholder="Nombre">
+
+            <label class="form-label">Imagen</label>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                <img id="edit-expr-img-preview" src="" alt=""
+                    style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--border-light);background:var(--bg-elevated);flex-shrink:0">
+                <div class="upload-area" style="flex:1;margin:0;padding:12px 16px">
+                    <input type="file" id="edit-expr-imagen" accept="image/*" onchange="previsualizarImagenEditar(this)">
+                    <div class="upload-text" style="font-size:0.82rem">📁 Cambiar imagen</div>
+                </div>
+            </div>
+
+            <label class="form-label">Patrones</label>
+            <div class="patron-input-row">
+                <input type="text" id="edit-patron-input" placeholder="Agregar patrón..."
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();agregarPatronEdit()}">
+                <button class="btn-add-patron" onclick="agregarPatronEdit()">+</button>
+            </div>
+            <div class="patrones-chips" id="patrones-chips-edit"></div>
+
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.88rem;color:var(--text-secondary)">
+                <input type="checkbox" id="edit-expr-default" style="width:16px;height:16px;accent-color:var(--accent)">
+                Expresión por <strong style="color:var(--text-primary)">default</strong>
+            </label>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-guardar" onclick="guardarEdicion()">Guardar cambios</button>
+            <button class="btn-cancelar" onclick="cerrarModalEditar()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- NOTIFICACIÓN -->
+<div class="notificacion" id="notificacion"></div>
+
+<script>
+    let expresiones   = [];
+    let _editandoId   = null;
+    let patronesNuevo = [];
+    let patronesEdit  = [];
+
+    // ── CARGA ─────────────────────────────────────────────────────────────────
+    async function cargarExpresiones() {
+        try {
+            const resp = await fetch('/api/expresiones');
+            if (!resp.ok) throw new Error();
+            expresiones = await resp.json();
+        } catch {
+            expresiones = JSON.parse(localStorage.getItem('expr_local') || '[]');
+        }
+        renderLista();
+    }
+    function saveLocal() { localStorage.setItem('expr_local', JSON.stringify(expresiones)); }
+
+    // ── RENDER ────────────────────────────────────────────────────────────────
+    function renderLista() {
+        const c = document.getElementById('listaExpresiones');
+        if (!expresiones.length) {
+            c.innerHTML = `<div class="empty-state"><div class="empty-state-icon">😶</div><div class="empty-state-text">No hay expresiones configuradas.<br>Creá una abajo.</div></div>`;
+            return;
+        }
+        c.innerHTML = expresiones.map(ex => {
+            const patrones = ex.patrones || [];
+            const thumb = ex.tiene_imagen
+                ? `<div class="expr-thumb"><img src="/api/expresiones/${ex.id}/imagen?t=${Date.now()}" alt="${ex.nombre}" onerror="this.parentElement.innerHTML='<span class=\\'expr-thumb-placeholder\\'>😶</span>'"></div>`
+                : `<div class="expr-thumb"><span class="expr-thumb-placeholder">😶</span></div>`;
+            const chips = patrones.length
+                ? patrones.map(p => `<span class="patron-tag">${escapeHtml(p)}</span>`).join('')
+                : `<span style="color:var(--text-muted);font-size:0.78rem">Sin patrones — solo activable como default</span>`;
+            return `
+            <div class="card-expresion${ex.es_default ? ' es-default' : ''}">
+                <div class="card-inner">
+                    <div class="card-top">
+                        ${thumb}
+                        <div class="card-info">
+                            <div class="card-nombre">
+                                ${escapeHtml(ex.nombre)}
+                                ${ex.es_default ? '<span class="badge-default">DEFAULT</span>' : ''}
+                            </div>
+                            <div>${chips}</div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-accion" data-action="editar" data-id="${ex.id}" title="Editar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Editar
+                        </button>
+                        ${!ex.es_default ? `
+                        <button class="btn-accion" data-action="setdefault" data-id="${ex.id}" title="Marcar como default">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            Default
+                        </button>` : ''}
+                        <button class="btn-delete" data-action="eliminar" data-id="${ex.id}" title="Eliminar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        c.querySelectorAll('[data-action]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const id = parseInt(btn.dataset.id);
+                if (btn.dataset.action === 'editar')     abrirModalEditar(id);
+                if (btn.dataset.action === 'setdefault') setDefault(id);
+                if (btn.dataset.action === 'eliminar')   eliminarExpresion(id);
+            });
+        });
+    }
+
+    function escapeHtml(t) {
+        return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── CHIPS ─────────────────────────────────────────────────────────────────
+    function renderChips(arr, containerId, removeFn) {
+        const c = document.getElementById(containerId);
+        c.innerHTML = arr.map((p, i) => `
+            <span class="chip">
+                ${escapeHtml(p)}
+                <button class="chip-del" data-idx="${i}" title="Quitar">✕</button>
+            </span>`).join('');
+        c.querySelectorAll('.chip-del').forEach(b =>
+            b.addEventListener('click', () => removeFn(parseInt(b.dataset.idx)))
+        );
+    }
+
+    function agregarPatron() {
+        const inp = document.getElementById('patron-input');
+        const val = inp.value.trim().toLowerCase();
+        if (!val || patronesNuevo.includes(val)) { inp.value = ''; return; }
+        patronesNuevo.push(val);
+        inp.value = '';
+        renderChips(patronesNuevo, 'patrones-chips-nuevo', i => { patronesNuevo.splice(i,1); renderChips(patronesNuevo,'patrones-chips-nuevo', arguments.callee); });
+    }
+
+    function agregarPatronEdit() {
+        const inp = document.getElementById('edit-patron-input');
+        const val = inp.value.trim().toLowerCase();
+        if (!val || patronesEdit.includes(val)) { inp.value = ''; return; }
+        patronesEdit.push(val);
+        inp.value = '';
+        _renderChipsEdit();
+    }
+    function _renderChipsEdit() {
+        renderChips(patronesEdit, 'patrones-chips-edit', i => { patronesEdit.splice(i,1); _renderChipsEdit(); });
+    }
+
+    // ── UPLOAD PREVIEW ────────────────────────────────────────────────────────
+    function previsualizarImagen(input) {
+        const f = input.files[0]; if (!f) return;
+        document.getElementById('upload-preview').src = URL.createObjectURL(f);
+        document.getElementById('upload-preview').style.display = 'block';
+        document.getElementById('upload-hint').style.display    = 'none';
+    }
+    function previsualizarImagenEditar(input) {
+        const f = input.files[0]; if (!f) return;
+        document.getElementById('edit-expr-img-preview').src = URL.createObjectURL(f);
+    }
+
+    // ── CREAR ─────────────────────────────────────────────────────────────────
+    async function crearExpresion() {
+        const nombre    = document.getElementById('nuevo-expr-nombre').value.trim();
+        const file      = document.getElementById('nuevo-expr-imagen').files[0];
+        const esDefault = document.getElementById('nuevo-expr-default').checked;
+        if (!nombre) { mostrarNotificacion('El nombre es obligatorio', 'error'); return; }
+
+        const fd = new FormData();
+        fd.append('nombre', nombre);
+        fd.append('patrones', JSON.stringify(patronesNuevo));
+        fd.append('es_default', esDefault ? '1' : '0');
+        if (file) fd.append('imagen', file);
+
+        try {
+            const r = await fetch('/api/expresiones', { method:'POST', body:fd });
+            if (!r.ok) throw new Error();
+        } catch {
+            const id = Date.now();
+            if (esDefault) expresiones.forEach(e => { e.es_default = false; });
+            expresiones.push({ id, nombre, patrones:[...patronesNuevo], es_default:esDefault, tiene_imagen:false });
+            saveLocal();
+        }
+
+        document.getElementById('nuevo-expr-nombre').value      = '';
+        document.getElementById('nuevo-expr-imagen').value      = '';
+        document.getElementById('upload-preview').style.display  = 'none';
+        document.getElementById('upload-hint').style.display     = 'block';
+        document.getElementById('nuevo-expr-default').checked    = false;
+        patronesNuevo = [];
+        renderChips(patronesNuevo, 'patrones-chips-nuevo', ()=>{});
+        cargarExpresiones();
+        mostrarNotificacion('Expresión guardada ✓', 'success');
+    }
+
+    // ── EDITAR ────────────────────────────────────────────────────────────────
+    function abrirModalEditar(id) {
+        const ex = expresiones.find(e => e.id === id); if (!ex) return;
+        _editandoId   = id;
+        patronesEdit  = [...(ex.patrones || [])];
+        document.getElementById('edit-expr-nombre').value    = ex.nombre;
+        document.getElementById('edit-expr-default').checked = !!ex.es_default;
+        document.getElementById('edit-expr-img-preview').src = ex.tiene_imagen
+            ? `/api/expresiones/${id}/imagen?t=${Date.now()}` : '';
+        document.getElementById('edit-expr-imagen').value = '';
+        _renderChipsEdit();
+        document.getElementById('modalEditar').classList.add('open');
+    }
+    function cerrarModalEditar() {
+        document.getElementById('modalEditar').classList.remove('open');
+        _editandoId = null;
+    }
+    async function guardarEdicion() {
+        if (!_editandoId) return;
+        const nombre    = document.getElementById('edit-expr-nombre').value.trim();
+        const esDefault = document.getElementById('edit-expr-default').checked;
+        const file      = document.getElementById('edit-expr-imagen').files[0];
+        if (!nombre) { mostrarNotificacion('El nombre es obligatorio', 'error'); return; }
+
+        const fd = new FormData();
+        fd.append('nombre', nombre);
+        fd.append('patrones', JSON.stringify(patronesEdit));
+        fd.append('es_default', esDefault ? '1' : '0');
+        if (file) fd.append('imagen', file);
+
+        try {
+            const r = await fetch(`/api/expresiones/${_editandoId}`, { method:'PUT', body:fd });
+            if (!r.ok) throw new Error();
+        } catch {
+            const i = expresiones.findIndex(e => e.id === _editandoId);
+            if (i > -1) {
+                if (esDefault) expresiones.forEach(e => { e.es_default = false; });
+                expresiones[i] = { ...expresiones[i], nombre, patrones:[...patronesEdit], es_default:esDefault };
+            }
+            saveLocal();
+        }
+        cerrarModalEditar();
+        cargarExpresiones();
+        mostrarNotificacion('Actualizado ✓', 'success');
+    }
+
+    // ── SET DEFAULT ───────────────────────────────────────────────────────────
+    async function setDefault(id) {
+        try {
+            const r = await fetch(`/api/expresiones/${id}/default`, { method:'POST' });
+            if (!r.ok) throw new Error();
+        } catch {
+            expresiones.forEach(e => { e.es_default = e.id === id; });
+            saveLocal();
+        }
+        cargarExpresiones();
+        mostrarNotificacion('Default actualizado ✓', 'success');
+    }
+
+    // ── ELIMINAR ──────────────────────────────────────────────────────────────
+    async function eliminarExpresion(id) {
+        if (!confirm('¿Eliminar esta expresión?')) return;
+        try {
+            const r = await fetch(`/api/expresiones/${id}`, { method:'DELETE' });
+            if (!r.ok) throw new Error();
+        } catch {
+            expresiones = expresiones.filter(e => e.id !== id); saveLocal();
+        }
+        cargarExpresiones();
+        mostrarNotificacion('Eliminado', 'success');
+    }
+
+    // ── NOTIFICACIÓN ──────────────────────────────────────────────────────────
+    function mostrarNotificacion(txt, tipo='success') {
+        const el = document.getElementById('notificacion');
+        el.textContent = tipo==='success' ? `✓  ${txt}` : `✕  ${txt}`;
+        el.className   = `notificacion notificacion-${tipo} mostrar`;
+        clearTimeout(window._nTimer);
+        window._nTimer = setTimeout(() => el.classList.remove('mostrar'), 3000);
+    }
+
+    // ── DRAG & DROP ───────────────────────────────────────────────────────────
+    const ua = document.getElementById('uploadArea');
+    ua.addEventListener('dragover',  e => { e.preventDefault(); ua.classList.add('drag-over'); });
+    ua.addEventListener('dragleave', () => ua.classList.remove('drag-over'));
+    ua.addEventListener('drop', e => {
+        e.preventDefault(); ua.classList.remove('drag-over');
+        const f = e.dataTransfer.files[0]; if (!f) return;
+        const dt = new DataTransfer(); dt.items.add(f);
+        document.getElementById('nuevo-expr-imagen').files = dt.files;
+        previsualizarImagen({ files:[f] });
+    });
+
+    // ── CERRAR MODAL CON CLICK FUERA ──────────────────────────────────────────
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+        m.addEventListener('click', e => { if (e.target === m) { m.classList.remove('open'); _editandoId = null; } });
+    });
+
+    document.addEventListener('DOMContentLoaded', cargarExpresiones);
+</script>
+</body>
+</html>

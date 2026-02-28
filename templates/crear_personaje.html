@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Personaje</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:    #050507;
+            --bg-secondary:  #101014;
+            --bg-card:       #18181e;
+            --border:        #23232C;
+            --border-hover:  #30303A;
+            --accent:        #EBB34B;
+            --accent-dim:    rgba(235,179,75,0.15);
+            --accent-glow:   rgba(235,179,75,0.1);
+            --text-primary:  #F2F2F5;
+            --text-secondary:#9E9EA8;
+            --text-muted:    #6B6B76;
+            --success:       #10b981;
+            --success-dim:   rgba(16,185,129,0.12);
+            --error:         #ef4444;
+            --nsfw:          #e05a7a;
+            --nsfw-dim:      rgba(224,90,122,0.1);
+            --nsfw-glow:     rgba(224,90,122,0.06);
+            --companion:     #7c6af5;
+            --companion-dim: rgba(124,106,245,0.12);
+            --radius:        14px;
+            --font-sans:     'Inter', system-ui, sans-serif;
+            --font-serif:    'Crimson Pro', Georgia, serif;
+            --font-mono:     'JetBrains Mono', monospace;
+            --shadow-sm:     0 2px 8px rgba(0,0,0,0.4);
+            --shadow-lg:     0 12px 32px rgba(0,0,0,0.6);
+            --shadow-glow:   0 0 20px rgba(235,179,75,0.35);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(235,179,75,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(255,255,255,0.02) 0%, transparent 50%);
+        }
+
+        .page-wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 80px; }
+
+        /* ── Header ── */
+        .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 40px; }
+
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--text-secondary); text-decoration: none;
+            font-family: var(--font-mono); font-size: 0.8rem;
+            border: 1px solid var(--border); padding: 10px 16px;
+            border-radius: 10px; background: var(--bg-secondary);
+            transition: all 0.2s; white-space: nowrap;
+            height: 44px; box-sizing: border-box;
+        }
+        .back-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); transform: translateX(-2px); }
+
+        .page-title {
+            font-size: 1.6rem; font-weight: 600; letter-spacing: -0.03em;
+            font-family: var(--font-sans);
+            background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .page-title span { -webkit-text-fill-color: var(--accent); font-style: normal; }
+
+        /* ── Toggle NSFW ── */
+        .nsfw-toggle-wrap {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 14px 18px;
+            margin-bottom: 16px; cursor: pointer;
+            transition: all 0.2s;
+            user-select: none; min-height: 56px;
+        }
+        .nsfw-toggle-wrap:hover { border-color: var(--border-hover); background: #1e1e26; }
+        .nsfw-toggle-wrap.activo { border-color: var(--nsfw); background: var(--nsfw-dim); }
+
+        /* ── Toggle Modo Memoria ── */
+        .modo-toggle-wrap {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 14px 18px;
+            margin-bottom: 16px; cursor: pointer;
+            transition: all 0.2s;
+            user-select: none; min-height: 56px;
+        }
+        .modo-toggle-wrap:hover { border-color: var(--border-hover); background: #1e1e26; }
+        .modo-toggle-wrap.companion { border-color: var(--companion); background: var(--companion-dim); }
+
+        .modo-toggle-switch {
+            width: 40px; height: 22px; border-radius: 11px;
+            background: var(--border); position: relative;
+            transition: background 0.25s; flex-shrink: 0;
+        }
+        .modo-toggle-switch::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--text-secondary); transition: transform 0.25s, background 0.25s;
+        }
+        .modo-toggle-wrap.companion .modo-toggle-switch { background: var(--companion); }
+        .modo-toggle-wrap.companion .modo-toggle-switch::after { transform: translateX(18px); background: #fff; }
+
+        .nsfw-toggle-switch {
+            width: 40px; height: 22px; border-radius: 11px;
+            background: var(--border); position: relative;
+            transition: background 0.25s; flex-shrink: 0;
+        }
+        .nsfw-toggle-switch::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--text-muted); transition: all 0.25s;
+        }
+        .nsfw-toggle-wrap.activo .nsfw-toggle-switch { background: var(--nsfw); }
+        .nsfw-toggle-wrap.activo .nsfw-toggle-switch::after {
+            background: white; left: 21px;
+        }
+        .nsfw-toggle-texto { flex: 1; }
+        .nsfw-toggle-titulo {
+            font-family: var(--font-mono);
+            font-size: 0.78rem; letter-spacing: 0.05em;
+            color: var(--text-primary); margin-bottom: 2px; font-weight: 500;
+        }
+        .nsfw-toggle-wrap.activo .nsfw-toggle-titulo { color: var(--nsfw); }
+        .nsfw-toggle-desc { font-size: 0.82rem; color: var(--text-secondary); }
+
+        /* ── Panel NSFW ── */
+        .nsfw-panel {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid rgba(224,90,122,0.35);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 16px;
+            animation: slideIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .nsfw-panel.visible { display: block; }
+
+        .nsfw-panel-titulo {
+            font-family: var(--font-mono);
+            font-size: 0.72rem; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--nsfw);
+            margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nsfw-panel-titulo::before { content: '✦'; font-size: 0.58rem; }
+
+        .nsfw-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .nsfw-field label {
+            color: var(--nsfw);
+            font-size: 0.68rem;
+            opacity: 0.85;
+        }
+
+        .nsfw-field input,
+        .nsfw-field textarea {
+            border-color: rgba(224,90,122,0.3);
+        }
+        .nsfw-field input:focus,
+        .nsfw-field textarea:focus {
+            border-color: var(--nsfw);
+            box-shadow: 0 0 0 3px var(--nsfw-glow);
+        }
+
+        /* ── Selector de modo ── */
+        .modo-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+
+        .modo-btn {
+            padding: 18px 14px; border-radius: var(--radius);
+            border: 1px solid var(--border); background: var(--bg-card);
+            cursor: pointer; text-align: left;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            color: var(--text-primary); font-family: var(--font-sans);
+        }
+        .modo-btn:hover { border-color: var(--border-hover); background: #1e1e26; }
+        .modo-btn.selected { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 20px rgba(235,179,75,0.08); }
+        .modo-btn-icon { font-size: 1.4rem; margin-bottom: 8px; }
+        .modo-btn-titulo { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; font-family: var(--font-sans); }
+        .modo-btn.selected .modo-btn-titulo { color: var(--accent); }
+        .modo-btn-desc { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.45; font-weight: 300; }
+        .modo-badge {
+            display: inline-block; font-family: var(--font-mono);
+            font-size: 0.58rem; letter-spacing: 0.07em; text-transform: uppercase;
+            background: var(--accent); color: #0a0a0d;
+            padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;
+        }
+
+        /* ── Progress ── */
+        .progress-wrap { margin-bottom: 32px; padding: 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
+        .progress-steps { display: flex; position: relative; }
+        .progress-steps::before {
+            content: ''; position: absolute; top: 15px; left: 16px; right: 16px;
+            height: 1px; background: var(--border); z-index: 0;
+        }
+        .step-dot { display: flex; flex-direction: column; align-items: center; gap: 7px; flex: 1; position: relative; z-index: 1; }
+        .step-dot-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--bg-secondary);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-mono); font-size: 0.72rem;
+            color: var(--text-muted); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .step-dot.active .step-dot-circle { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); box-shadow: var(--shadow-glow); }
+        .step-dot.done .step-dot-circle { border-color: var(--success); background: var(--success-dim); color: var(--success); }
+        .step-dot-label { font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); text-align: center; transition: color 0.3s; }
+        .step-dot.active .step-dot-label { color: var(--accent); }
+        .step-dot.done .step-dot-label { color: var(--success); }
+
+        /* ── Cards ── */
+        .step-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; display: none; animation: slideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .step-card.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        .step-card-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 6px; font-family: var(--font-sans); letter-spacing: -0.02em; }
+        .step-card-hint { font-size: 0.87rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.6; font-weight: 300; }
+        .step-card-hint strong { color: var(--accent); font-style: normal; font-weight: 600; }
+
+        .callout {
+            background: var(--bg-secondary); border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0; padding: 14px 18px; margin-bottom: 18px;
+            font-size: 0.84rem; color: var(--text-secondary); line-height: 1.65;
+        }
+        .callout strong { color: var(--text-primary); font-weight: 600; }
+        .callout code { font-family: var(--font-mono); font-size: 0.78rem; background: var(--accent-dim); color: var(--accent); padding: 1px 6px; border-radius: 4px; }
+
+        /* ── Secciones de preguntas ── */
+        .seccion-titulo {
+            font-family: var(--font-mono);
+            font-size: 0.7rem; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--accent);
+            margin: 28px 0 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .seccion-titulo::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+        .seccion-titulo:first-child { margin-top: 0; }
+
+        .preguntas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .pregunta-full { grid-column: 1 / -1; }
+
+        /* ── Form ── */
+        .form-group { margin-bottom: 16px; }
+
+        label {
+            display: block; font-family: var(--font-mono);
+            font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-secondary); margin-bottom: 7px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%; background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 16px; color: var(--text-primary);
+            font-family: var(--font-sans); font-size: 0.95rem;
+            resize: vertical; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box; -webkit-appearance: none;
+        }
+        input[type="text"]:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(235,179,75,0.12); }
+        textarea { min-height: 90px; }
+        textarea.tall { min-height: 145px; }
+        textarea.xtall { min-height: 190px; }
+
+        .char-count { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; }
+
+        /* ── Resultado IA ── */
+        .ia-result-wrap { display: none; margin-top: 18px; }
+        .ia-result-wrap.visible { display: block; animation: slideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .ia-result-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 9px; display: flex; align-items: center; gap: 8px; }
+        .ia-result-label::before { content: '✦'; font-size: 0.57rem; }
+        .ia-result-box { background: var(--bg-secondary); border: 1px solid rgba(235,179,75,0.3); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 16px 18px; font-size: 0.92rem; line-height: 1.8; color: var(--text-primary); white-space: pre-wrap; font-family: var(--font-serif); }
+
+        /* ── Tags ── */
+        .tags-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag-chip { background: var(--accent-dim); border: 1px solid rgba(235,179,75,0.4); color: var(--accent); border-radius: 20px; padding: 5px 14px; font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer; transition: all 0.2s; }
+        .tag-chip:hover { background: rgba(235,179,75,0.25); border-color: var(--accent); }
+        .tag-chip.desactivado { opacity: 0.3; text-decoration: line-through; }
+        .tag-chip::after { content: ' ×'; opacity: 0.6; }
+
+        /* ── Botones ── */
+        .btn-row { display: flex; gap: 10px; margin-top: 22px; align-items: center; flex-wrap: wrap; }
+
+        .btn { padding: 11px 20px; border-radius: 9px; border: none; cursor: pointer; font-family: var(--font-sans); font-size: 0.87rem; font-weight: 500; letter-spacing: 0; transition: all 0.2s; display: flex; align-items: center; gap: 8px; white-space: nowrap; height: 44px; box-sizing: border-box; }
+        .btn:disabled { cursor: not-allowed; opacity: 0.45; }
+
+        .btn-primary { background: var(--accent); color: var(--bg-primary); font-weight: 600; box-shadow: 0 4px 12px rgba(235,179,75,0.2); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 6px 20px rgba(235,179,75,0.3); }
+
+        .btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-secondary:hover:not(:disabled) { color: var(--text-primary); border-color: var(--border-hover); background: #1e1e26; }
+
+        .btn-ghost { background: transparent; color: var(--accent); border: 1px solid rgba(235,179,75,0.4); }
+        .btn-ghost:hover:not(:disabled) { background: var(--accent-dim); border-color: var(--accent); }
+
+        .btn-generar {
+            background: var(--accent);
+            color: var(--bg-primary); font-weight: 700; font-size: 0.9rem;
+            padding: 14px 26px; width: 100%; justify-content: center;
+            margin-top: 10px; box-shadow: 0 4px 20px rgba(235,179,75,0.2);
+            height: 52px; border-radius: 10px;
+        }
+        .btn-generar:hover:not(:disabled) { box-shadow: var(--shadow-glow); transform: translateY(-1px); filter: brightness(1.05); }
+
+        .spinner { width: 15px; height: 15px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+        .loading .spinner { display: block; }
+        .loading .btn-label { opacity: 0.55; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Resumen ── */
+        .resumen-grid { display: grid; gap: 12px; }
+        .resumen-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
+        .resumen-item:hover { border-color: var(--border-hover); background: #1e1e26; }
+        .resumen-item-titulo { font-family: var(--font-mono); font-size: 0.63rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
+        .resumen-item-titulo::after { content: 'Editar →'; font-size: 0.58rem; color: var(--text-muted); margin-left: auto; }
+        .resumen-item-texto { font-size: 0.87rem; line-height: 1.6; color: var(--text-primary); font-family: var(--font-sans); }
+        .resumen-ok { border-left: 3px solid var(--success); }
+        .resumen-vacio { border-left: 3px solid var(--text-muted); }
+
+        /* ── Notif ── */
+        .notif { position: fixed; bottom: 20px; left: 50%; width: calc(100% - 32px); max-width: 400px; transform: translateX(-50%) translateY(20px); background: var(--bg-card); border: 1px solid var(--border-hover); border-radius: 12px; padding: 14px 20px; font-family: var(--font-sans); font-size: 0.87rem; font-weight: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 999; box-shadow: var(--shadow-lg); box-sizing: border-box; }
+        .notif.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .notif.success { border-bottom: 3px solid var(--success); color: var(--success); }
+        .notif.error   { border-bottom: 3px solid var(--error);   color: var(--error); }
+        .notif.info    { border-bottom: 3px solid var(--accent);  color: var(--accent); }
+
+        /* ── Éxito ── */
+        .success-screen { display: none; text-align: center; padding: 60px 32px; }
+        .success-screen.show { display: block; animation: slideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .success-icon { font-size: 3.5rem; margin-bottom: 20px; }
+        .success-title { font-size: 1.8rem; font-weight: 600; margin-bottom: 10px; font-family: var(--font-sans); letter-spacing: -0.02em; }
+        .success-subtitle { color: var(--text-secondary); margin-bottom: 32px; font-size: 0.9rem; font-weight: 300; }
+        .success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* ── Overlay de carga ── */
+        .overlay-carga { display: none; position: fixed; inset: 0; background: rgba(5,5,7,0.9); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
+        .overlay-carga.show { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .overlay-spinner { width: 48px; height: 48px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .overlay-msg { font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent); letter-spacing: 0.05em; }
+
+        /* ── Color picker ── */
+        .color-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+        .color-row label { margin: 0; white-space: nowrap; }
+        .color-preview { flex: 1; height: 26px; border-radius: 6px; border: 1px solid var(--border); background: #1a1a2e; display: flex; align-items: center; padding: 0 10px; }
+        .color-preview span { font-size: 0.62rem; color: rgba(255,255,255,0.28); font-family: 'JetBrains Mono', monospace; }
+
+        /* ── Texto de ayuda bajo cada campo ── */
+        .ayuda {
+            font-size: 0.79rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.55;
+            font-weight: 300;
+        }
+        .ayuda strong { color: var(--text-secondary); font-weight: 500; }
+
+        @media (max-width: 580px) {
+            .modo-selector { grid-template-columns: 1fr; }
+            .preguntas-grid { grid-template-columns: 1fr; }
+            .nsfw-grid { grid-template-columns: 1fr; }
+            .page-header { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Overlay de carga -->
+<div class="overlay-carga" id="overlay-carga">
+    <div class="overlay-spinner"></div>
+    <div class="overlay-msg" id="overlay-msg">Generando personaje...</div>
+</div>
+
+<div class="page-wrap">
+
+    <!-- Header -->
+    <div class="page-header">
+        <a href="/" class="back-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Volver al chat
+        </a>
+        <h1 class="page-title">Crear <span>personaje</span></h1>
+    </div>
+
+    <!-- ═══ PASO 0: Nombre + modo + NSFW ═══════════════════════════════ -->
+    <div class="step-card active" id="step-0">
+        <h2 class="step-card-title">¿Cómo se llama tu personaje?</h2>
+
+        <div class="form-group" style="margin-bottom:24px">
+            <label>Nombre del personaje</label>
+            <input type="text" id="input-nombre" placeholder="Ej: Zoro, Elara, Viktor..." maxlength="60" autocomplete="off">
+        </div>
+
+        <!-- Toggle Modo Memoria -->
+    <div class="modo-toggle-wrap" id="modo-toggle" onclick="toggleModoMemoria()">
+        <div class="modo-toggle-switch"></div>
+        <div>
+            <div style="font-weight:600;font-size:0.95rem" id="modo-toggle-label">🎭 Modo: Roleplay</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;margin-top:2px" id="modo-toggle-desc">
+                La IA solo recuerda datos reales del usuario, no acciones de ficción
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle NSFW -->
+        <div class="nsfw-toggle-wrap" id="nsfw-toggle" onclick="toggleNSFW()">
+            <div class="nsfw-toggle-switch" id="nsfw-switch"></div>
+            <div class="nsfw-toggle-texto">
+                <div class="nsfw-toggle-titulo">Contenido adulto (NSFW)</div>
+                <div class="nsfw-toggle-desc">Activa preguntas y generación de contenido íntimo/sexual. Solo para mayores de 18 años.</div>
+            </div>        </div>
+
+        <!-- Panel NSFW -->
+        <div class="nsfw-panel" id="nsfw-panel">
+            <div class="nsfw-panel-titulo">Información íntima del personaje</div>
+            <div class="nsfw-grid">
+                <div class="form-group nsfw-field">
+                    <label>Dinámica íntima</label>
+                    <input type="text" id="nsfw-dinamica" placeholder="Ej: dominante pero atento, sumiso, equilibrado...">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">Cómo se comporta en general en la intimidad. ¿Lleva la iniciativa o sigue? ¿Es intenso, tierno, controlado?</div>
+                </div>
+                <div class="form-group nsfw-field">
+                    <label>Rol (dom/sub/switch)</label>
+                    <input type="text" id="nsfw-rol" placeholder="Ej: dominante por naturaleza, switch según el mood...">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)"><strong>Dom</strong> = lleva el control. <strong>Sub</strong> = entrega el control. <strong>Switch</strong> = puede ser los dos según la situación.</div>
+                </div>
+                <div class="form-group nsfw-field">
+                    <label>Preferencias o kinks</label>
+                    <input type="text" id="nsfw-preferencias" placeholder="Ej: slow burn, tensión antes, palabras al oído...">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">Lo que le gusta o lo que lo excita. Puede ser tan explícito o implícito como quieras.</div>
+                </div>
+                <div class="form-group nsfw-field">
+                    <label>Tono en escenas íntimas</label>
+                    <input type="text" id="nsfw-tono" placeholder="Ej: intenso y callado, vocal, tierno pero apasionado...">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">¿Cómo cambia su voz y sus palabras? ¿Se vuelve más directo, más suave? Esto define el estilo de escritura en esas escenas.</div>
+                </div>
+                <div class="form-group nsfw-field">
+                    <label>Límites / hard limits</label>
+                    <input type="text" id="nsfw-limites" placeholder="Ej: sin humillación, sin violencia, etc.">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">Cosas que el personaje nunca haría o que vos no querés ver. La IA las va a evitar activamente.</div>
+                </div>
+                <div class="form-group nsfw-field">
+                    <label>Escena típica (opcional)</label>
+                    <input type="text" id="nsfw-escena" placeholder="Ej: después de una pelea, en el camarote del barco...">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">Un contexto o situación donde querés que se desarrolle la intimidad. Ayuda a que el ejemplo generado sea más específico.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selector de modo -->
+        <div style="margin-bottom:8px"><label>¿Cómo querés crear el personaje?</label></div>
+        <div class="modo-selector">
+            <button class="modo-btn selected" id="modo-express-btn" onclick="seleccionarModo('express')">
+                <div class="modo-btn-icon">⚡</div>
+                <div class="modo-btn-titulo">Express <span class="modo-badge">Recomendado</span></div>
+                <div class="modo-btn-desc">Escribís todo lo que sabés del personaje en un solo texto libre — la IA genera la ficha completa de una sola vez. El más rápido y el que mejores resultados da.</div>
+            </button>
+            <button class="modo-btn" id="modo-preguntas-btn" onclick="seleccionarModo('preguntas')">
+                <div class="modo-btn-icon">❓</div>
+                <div class="modo-btn-titulo">Preguntas</div>
+                <div class="modo-btn-desc">Formulario con ~20 preguntas organizadas por categoría (apariencia, personalidad, historia, escenario…). Ideal si no sabés por dónde empezar o si el personaje es original tuyo.</div>
+            </button>
+            <button class="modo-btn" id="modo-manual-btn" onclick="seleccionarModo('manual')">
+                <div class="modo-btn-icon">✎</div>
+                <div class="modo-btn-titulo">Paso a paso</div>
+                <div class="modo-btn-desc">Completás cada campo uno por uno con ayuda opcional de IA en cada paso. Más lento, pero tenés control total sobre cada parte de la ficha.</div>
+            </button>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="avanzarDesdeNombre()">
+                <span class="btn-label">Continuar</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ PASO EXPRESS ═════════════════════════════════════════════ -->
+    <div class="step-card" id="step-express">
+        <h2 class="step-card-title">Describí tu personaje</h2>
+        <p class="step-card-hint">Escribí todo lo que sepas: apariencia, personalidad, historia, de qué obra es. <strong>Cuanto más detalle, mejor resultado.</strong></p>
+
+        <div class="callout">
+            <strong>¿Qué incluir?</strong> Apariencia física, vestimenta, rasgos de personalidad, cómo habla, trasfondo, de qué serie/juego/libro es. Podés mezclar todo sin orden.<br><br>
+            <em>Ejemplo: "Es conocido como El Cazador de Piratas. 1,81m, cabello verde puntiagudo, haramaki verde, tres espadas. Cicatriz en ojo izquierdo y cicatriz grande desde hombro hasta cadera. Muy serio y orgulloso, habla poco pero cada palabra pesa. Sueña con ser el mejor espadachín del mundo."</em>
+        </div>
+
+        <div class="form-group">
+            <label>Tu descripción <span style="color:var(--text-muted);font-size:0.62rem">(mínimo 50 caracteres)</span></label>
+            <textarea id="input-idea-base" class="xtall" placeholder="Describí al personaje con todo lo que sepas..."></textarea>
+            <div class="char-count" id="cc-idea">0 / mín. 50</div>
+        </div>
+
+        <button class="btn btn-generar" onclick="ejecutarExpress(this)">
+            <div class="spinner"></div>
+            <span class="btn-label">⚡ Generar personaje completo</span>
+        </button>
+
+        <div class="btn-row" style="margin-top:14px">
+            <button class="btn btn-secondary" onclick="volverA0()">Atrás</button>
+        </div>
+    </div>
+
+    <!-- ═══ PASO PREGUNTAS ════════════════════════════════════════════ -->
+    <div class="step-card" id="step-preguntas">
+        <h2 class="step-card-title">Formulario guiado</h2>
+        <p class="step-card-hint">Completá las preguntas que quieras. <strong>No es obligatorio responder todo</strong> — la IA trabaja con lo que le des. Más respuestas = mejor resultado.</p>
+
+        <!-- Sección: Apariencia -->
+        <div class="seccion-titulo">👤 Apariencia física y vestimenta</div>
+        <div class="preguntas-grid">
+            <div class="form-group">
+                <label>Altura y complexión</label>
+                <input type="text" id="p-altura" placeholder="Ej: 1,81m, complexión atlética y musculosa...">
+                <div class="ayuda">Qué tan alto es y cómo está construido físicamente. Afecta cómo se describe su presencia y movimientos.</div>
+            </div>
+            <div class="form-group">
+                <label>Cabello</label>
+                <input type="text" id="p-cabello" placeholder="Ej: verde puntiagudo, con patillas...">
+                <div class="ayuda">Color, largo, estilo. Es uno de los rasgos más identificables a primera vista.</div>
+            </div>
+            <div class="form-group">
+                <label>Rasgos faciales</label>
+                <input type="text" id="p-rasgos" placeholder="Ej: mirada seria, cicatriz en ojo izquierdo, mandíbula firme...">
+                <div class="ayuda">Ojos, expresión habitual, cicatrices, barba, color de piel. Lo que más se nota al mirarlo a la cara.</div>
+            </div>
+            <div class="form-group">
+                <label>Vestimenta habitual</label>
+                <input type="text" id="p-vestimenta" placeholder="Ej: camisa blanca, pantalones negros, haramaki verde...">
+                <div class="ayuda">Ropa que usa siempre o casi siempre. Dice mucho sobre su personalidad y contexto.</div>
+            </div>
+            <div class="form-group pregunta-full">
+                <label>Detalles físicos únicos</label>
+                <input type="text" id="p-detalles" placeholder="Ej: cicatriz grande desde hombro hasta cadera, tres pendientes dorados en oreja izquierda, vendas en brazos...">
+                <div class="ayuda">Accesorios, marcas, tatuajes, hábitos físicos (como cruzar los brazos siempre). Los detalles únicos son lo que hace inconfundible a un personaje.</div>
+            </div>
+        </div>
+
+        <!-- Sección: Personalidad -->
+        <div class="seccion-titulo">🧠 Personalidad y forma de hablar</div>
+        <div class="preguntas-grid">
+            <div class="form-group">
+                <label>¿Cómo habla?</label>
+                <input type="text" id="p-habla" placeholder="Ej: directo, pocas palabras, voz ronca y grave...">
+                <div class="ayuda">¿Usa frases cortas o largas? ¿Habla mucho o poco? ¿Tono formal o informal? Esto define cómo se va a expresar en cada mensaje.</div>
+            </div>
+            <div class="form-group">
+                <label>¿Cómo reacciona al conflicto?</label>
+                <input type="text" id="p-reacciones" placeholder="Ej: no se altera, responde con acciones, tensa la mandíbula...">
+                <div class="ayuda">¿Se enoja fácil? ¿Se cierra? ¿Actúa en vez de discutir? Define cómo se comporta cuando algo lo molesta o lo presiona.</div>
+            </div>
+            <div class="form-group">
+                <label>Sentido del humor</label>
+                <input type="text" id="p-humor" placeholder="Ej: seco y casi inexistente, sarcástico ocasional...">
+                <div class="ayuda">¿Hace chistes? ¿Ironía? ¿No tiene humor en absoluto? Un detalle pequeño que hace al personaje mucho más real.</div>
+            </div>
+            <div class="form-group">
+                <label>¿Qué valora / qué lo define?</label>
+                <input type="text" id="p-valores" placeholder="Ej: lealtad hasta la muerte, el código del guerrero, su sueño...">
+                <div class="ayuda">Sus principios inamovibles. Lo que nunca haría y por qué vive. Es el corazón de su personalidad.</div>
+            </div>
+            <div class="form-group pregunta-full">
+                <label>¿Qué lo hace actuar / cuáles son sus miedos o deseos ocultos?</label>
+                <input type="text" id="p-miedos" placeholder="Ej: le aterra fallarle a alguien importante, desea ser el mejor pero no lo admitiría en voz alta...">
+                <div class="ayuda">Lo que no diría en voz alta pero que guía sus acciones. Esto hace que el personaje se sienta profundo y real, no solo una lista de rasgos.</div>
+            </div>
+        </div>
+
+        <!-- Sección: Historia -->
+        <div class="seccion-titulo">📖 Historia y trasfondo</div>
+        <div class="preguntas-grid">
+            <div class="form-group">
+                <label>Origen o contexto</label>
+                <input type="text" id="p-origen" placeholder="Ej: pirata de la tripulación Sombrero de Paja, ex cazarrecompensas...">
+                <div class="ayuda">De dónde viene, a qué grupo pertenece, qué hace. Si es un personaje de una obra, podés escribirlo directamente.</div>
+            </div>
+            <div class="form-group">
+                <label>Logros o habilidades destacadas</label>
+                <input type="text" id="p-logros" placeholder="Ej: espadachín con tres espadas, sobrevivió Kizaru, entrenó con Mihawk...">
+                <div class="ayuda">Sus capacidades más importantes. Ayuda a la IA a entender qué tan poderoso, experto o especial es el personaje.</div>
+            </div>
+            <div class="form-group pregunta-full">
+                <label>Historia, traumas o momentos clave</label>
+                <textarea id="p-historia" placeholder="Ej: perdió a su amiga de infancia Kuina y juró en su nombre convertirse en el mejor. Lleva sus heridas como medallas..."></textarea>
+                <div class="ayuda">Experiencias que lo formaron. No necesitás escribir toda la historia — solo los momentos que más lo definen como persona. Esto da profundidad emocional al personaje.</div>
+            </div>
+        </div>
+
+        <!-- Sección: Dinámica -->
+        <div class="seccion-titulo">💬 Dinámica con el usuario</div>
+        <div class="preguntas-grid">
+            <div class="form-group">
+                <label>Tipo de vínculo con el usuario</label>
+                <input type="text" id="p-vinculo" placeholder="Ej: compañero de tripulación, protector, interés romántico...">
+                <div class="ayuda">¿Qué relación tienen? ¿Son amigos, extraños, hay tensión romántica? Esto define el tono de cada conversación.</div>
+            </div>
+            <div class="form-group">
+                <label>¿Cómo trata al usuario?</label>
+                <input type="text" id="p-trato" placeholder="Ej: serio pero protector, le baja la guardia lentamente...">
+                <div class="ayuda">¿Es frío al principio? ¿Cálido? ¿Lo toma en serio? ¿Lo protege? Esta pregunta define cómo se va a sentir chatear con él.</div>
+            </div>
+            <div class="form-group pregunta-full">
+                <label>¿Cómo evoluciona la relación?</label>
+                <input type="text" id="p-evolucion" placeholder="Ej: slow burn, al principio distante pero se va abriendo con el tiempo...">
+                <div class="ayuda"><strong>Slow burn</strong> = la cercanía crece lento. <strong>Directo</strong> = ya hay confianza desde el principio. <strong>Tenso</strong> = hay fricciones. Esto se traduce en cómo habla el personaje según avanza el chat.</div>
+            </div>
+        </div>
+
+        <!-- Sección: Escenario -->
+        <div class="seccion-titulo">🌍 Escenario y ambiente</div>
+        <div class="preguntas-grid">
+            <div class="form-group">
+                <label>Lugar donde suceden las conversaciones</label>
+                <input type="text" id="p-lugar" placeholder="Ej: cubierta del Thousand Sunny, barco pirata en el Gran Line...">
+                <div class="ayuda">El lugar "default" donde está el personaje cuando chateas con él. No tiene que ser siempre el mismo, pero tener uno base hace que las respuestas sean más inmersivas.</div>
+            </div>
+            <div class="form-group">
+                <label>Momento del día / atmósfera</label>
+                <input type="text" id="p-atmosfera" placeholder="Ej: atardecer, mar en calma, viento salado, luz dorada...">
+                <div class="ayuda">La hora, el clima, el estado del lugar. Detalles sensoriales que hacen que el escenario se sienta real.</div>
+            </div>
+            <div class="form-group pregunta-full">
+                <label>Objetos o detalles del ambiente</label>
+                <input type="text" id="p-objetos" placeholder="Ej: botella de sake, espadas colgadas, el crujir de las tablas...">
+                <div class="ayuda">Cosas específicas del lugar que el personaje puede mencionar, tocar o usar. Los objetos concretos hacen al escenario mucho más vívido que una descripción genérica.</div>
+            </div>
+        </div>
+
+        <!-- Sección NSFW (solo si está activado) -->
+        <div id="preguntas-nsfw-extra" style="display:none">
+            <div class="seccion-titulo" style="color:var(--nsfw);border-bottom-color:rgba(224,90,122,0.3)">🔞 Dinámica íntima</div>
+            <div class="preguntas-grid">
+                <div class="form-group nsfw-field">
+                    <label>Cómo es en la intimidad</label>
+                    <input type="text" id="p-nsfw-como" placeholder="Ej: intenso y callado, controlado hasta que se suelta...">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">Cómo cambia su comportamiento en una escena íntima. ¿Se mantiene serio? ¿Pierde el control? ¿Es tierno o dominante?</div>
+                </div>
+                <div class="form-group nsfw-field">
+                    <label>Señales de atracción / tensión</label>
+                    <input type="text" id="p-nsfw-tension" placeholder="Ej: miradas largas, acercamientos sin razón, protege el espacio del usuario...">
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">Cómo demuestra que le gusta el usuario antes de que pase algo. Gestos sutiles que construyen la tensión.</div>
+                </div>
+                <div class="form-group pregunta-full nsfw-field">
+                    <label>¿Hay escenas o situaciones íntimas específicas que querés?</label>
+                    <textarea id="p-nsfw-escenas" placeholder="Ej: momentos después de una batalla, en el camarote, tensión antes del combate..."></textarea>
+                    <div class="ayuda" style="color:rgba(224,90,122,0.6)">Situaciones o contextos donde querés que se desarrolle la dimensión íntima del personaje. Cuanto más específico, más fiel al resultado.</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-generar" onclick="ejecutarPreguntas(this)">
+            <div class="spinner"></div>
+            <span class="btn-label">✦ Generar personaje con estas respuestas</span>
+        </button>
+
+        <div class="btn-row" style="margin-top:14px">
+            <button class="btn btn-secondary" onclick="volverA0()">Atrás</button>
+        </div>
+    </div>
+
+    <!-- ═══ Progress bar (modo manual) ═════════════════════════════ -->
+    <div class="progress-wrap" id="progress-manual" style="display:none">
+        <div class="progress-steps">
+            <div class="step-dot" id="dot-1"><div class="step-dot-circle">1</div><div class="step-dot-label">Descripción</div></div>
+            <div class="step-dot" id="dot-2"><div class="step-dot-circle">2</div><div class="step-dot-label">Personalidad</div></div>
+            <div class="step-dot" id="dot-3"><div class="step-dot-circle">3</div><div class="step-dot-label">Escenario</div></div>
+            <div class="step-dot" id="dot-4"><div class="step-dot-circle">4</div><div class="step-dot-label">1er Mensaje</div></div>
+            <div class="step-dot" id="dot-5"><div class="step-dot-circle">5</div><div class="step-dot-label">Ejemplos</div></div>
+            <div class="step-dot" id="dot-6"><div class="step-dot-circle">6</div><div class="step-dot-label">Tags</div></div>
+            <div class="step-dot" id="dot-7"><div class="step-dot-circle">7</div><div class="step-dot-label">Revisar</div></div>
+        </div>
+    </div>
+
+    <!-- ═══ PASO 1: Descripción ══════════════════════════════════════ -->
+    <div class="step-card" id="step-1">
+        <h2 class="step-card-title">Descripción física</h2>
+        <p class="step-card-hint">Apariencia, complexión, vestimenta y lo que lo hace visualmente reconocible. La IA organiza en prosa fluida <strong>sin inventar nada que no hayas escrito</strong>.</p>
+        <div class="callout">
+            <strong>¿Para qué sirve este campo?</strong> Es lo que describe al personaje en tercera persona — cómo se ve, cómo se mueve, qué transmite al entrar a un lugar. El resultado va a tener 3 párrafos: apariencia → vestimenta → aura.<br><br>
+            <strong>Qué escribir:</strong> altura, complexión, color y estilo de cabello, rasgos del rostro, ropa habitual, accesorios, cicatrices o detalles únicos. No hace falta que esté ordenado.
+        </div>
+        <div class="form-group">
+            <label>Tu descripción</label>
+            <textarea id="input-descripcion" class="tall" placeholder="Ej: Mujer de 30 años, cabello negro corto, ojos grises. Siempre viste de negro. Cicatriz en ceja derecha..."></textarea>
+            <div class="ayuda">Escribí todo lo que se te ocurra sobre cómo se ve. La IA lo va a organizar — no hace falta que sea perfecto ni ordenado.</div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="retroceder(1)">Atrás</button>
+            <button class="btn btn-ghost" onclick="enriquecerPaso('descripcion', this)"><div class="spinner"></div><span class="btn-label">✦ Enriquecer con IA</span></button>
+            <button class="btn btn-primary" onclick="avanzar(1)"><span class="btn-label">Continuar</span></button>
+        </div>
+        <div class="ia-result-wrap" id="result-descripcion">
+            <div class="ia-result-label">Versión enriquecida</div>
+            <div class="ia-result-box" id="result-descripcion-texto"></div>
+            <div class="btn-row" style="margin-top:10px">
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="usarResultado('descripcion')">✓ Usar esta versión</button>
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="enriquecerPaso('descripcion', this)">Regenerar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PASO 2: Personalidad ══════════════════════════════════════ -->
+    <div class="step-card" id="step-2">
+        <h2 class="step-card-title">Personalidad</h2>
+        <p class="step-card-hint">Escribí libremente cómo es el personaje. La IA lo convierte en instrucciones <strong>en primera persona</strong> — como si el personaje se describiera a sí mismo.</p>
+        <div class="callout">
+            <strong>¿Para qué sirve?</strong> Es el campo más importante de la ficha. Define cómo habla el personaje en cada mensaje — su tono, sus reacciones, qué lo hace único.<br><br>
+            <strong>Resultado:</strong> primera persona — <code>"Hablo con...", "Cuando me preguntan...", "Mi humor es..."</code><br><br>
+            <strong>Qué escribir:</strong> cómo habla (formal, directo, poético), cómo reacciona al conflicto, qué lo hace reír, qué lo enoja, qué valora, cómo trata al usuario.
+        </div>
+        <div class="form-group">
+            <label>Rasgos y forma de ser</label>
+            <textarea id="input-personalidad" class="tall" placeholder="Ej: Serio pero con sentido del humor seco. Muy orgulloso. No pide ayuda fácilmente pero es leal hasta la muerte..."></textarea>
+            <div class="ayuda">No hace falta escribirlo en forma de instrucciones — escribilo como si describieras a alguien que conocés. La IA lo convierte al formato correcto.</div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="retroceder(2)">Atrás</button>
+            <button class="btn btn-ghost" onclick="enriquecerPaso('personalidad', this)"><div class="spinner"></div><span class="btn-label">✦ Enriquecer con IA</span></button>
+            <button class="btn btn-primary" onclick="avanzar(2)"><span class="btn-label">Continuar</span></button>
+        </div>
+        <div class="ia-result-wrap" id="result-personalidad">
+            <div class="ia-result-label">Versión en primera persona</div>
+            <div class="ia-result-box" id="result-personalidad-texto"></div>
+            <div class="btn-row" style="margin-top:10px">
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="usarResultado('personalidad')">✓ Usar esta versión</button>
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="enriquecerPaso('personalidad', this)">Regenerar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PASO 3: Escenario ══════════════════════════════════════════ -->
+    <div class="step-card" id="step-3">
+        <h2 class="step-card-title">Escenario</h2>
+        <p class="step-card-hint">¿Dónde suceden las conversaciones? Un lugar específico hace que el personaje responda de forma más coherente e inmersiva.</p>
+        <div class="callout">
+            <strong>¿Para qué sirve?</strong> El escenario aparece al inicio del chat y le da contexto al personaje — dónde está, qué hace cuando llegás. No es obligatorio pero mejora mucho la experiencia.<br><br>
+            <strong>Qué escribir:</strong> el lugar (oficina, barco, ciudad), el momento del día, la atmósfera (silencioso, lluvioso, íntimo), objetos o detalles del ambiente.
+        </div>
+        <div class="form-group">
+            <label>Lugar o situación</label>
+            <textarea id="input-escenario" placeholder="Ej: La cubierta del Thousand Sunny al atardecer, con el mar en calma y olor a sal..."></textarea>
+            <div class="ayuda">Podés escribirlo de forma simple — la IA agrega los detalles sensoriales. Cuanto más específico, mejor.</div>
+        </div>
+        <div class="color-row">
+            <label>🎨 Color del fondo:</label>
+            <input type="color" id="input-color-escenario" value="#1a1a2e"
+                style="width:32px;height:26px;border:1px solid var(--border);background:none;cursor:pointer;border-radius:5px;padding:0"
+                oninput="document.getElementById('color-preview').style.background=this.value">
+            <div class="color-preview" id="color-preview"><span>vista previa del chat</span></div>
+        </div>
+        <div class="ayuda" style="margin-top:8px">El color de fondo del chat cuando estés hablando con este personaje. Elegí algo que combine con el ambiente del escenario.</div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="retroceder(3)">Atrás</button>
+            <button class="btn btn-ghost" onclick="enriquecerPaso('escenario', this)"><div class="spinner"></div><span class="btn-label">✦ Enriquecer con IA</span></button>
+            <button class="btn btn-primary" onclick="avanzar(3)"><span class="btn-label">Continuar</span></button>
+        </div>
+        <div class="ia-result-wrap" id="result-escenario">
+            <div class="ia-result-label">Versión enriquecida</div>
+            <div class="ia-result-box" id="result-escenario-texto"></div>
+            <div class="btn-row" style="margin-top:10px">
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="usarResultado('escenario')">✓ Usar esta versión</button>
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="enriquecerPaso('escenario', this)">Regenerar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PASO 4: Primer mensaje ════════════════════════════════════ -->
+    <div class="step-card" id="step-4">
+        <h2 class="step-card-title">Primer mensaje</h2>
+        <p class="step-card-hint">Lo primero que ve el usuario. La IA lo escribe en formato roleplay en <strong>primera persona</strong>. Podés dejar el campo vacío y deja que la IA lo cree.</p>
+        <div class="callout">
+            <strong>¿Para qué sirve?</strong> Es lo que aparece cuando abrís el chat por primera vez — el personaje te recibe. Establece el tono de toda la conversación.<br><br>
+            <strong>Formato que genera la IA:</strong> <code>*acciones entre asteriscos*</code>, diálogo normal, <code>((pensamientos entre paréntesis dobles))</code>.<br><br>
+            <strong>Si dejás el campo vacío:</strong> la IA crea un inicio natural basado en el escenario y la personalidad. Si escribís algo, lo usa como punto de partida.
+        </div>
+        <div class="form-group">
+            <label>Situación inicial (opcional)</label>
+            <textarea id="input-primer_mensaje" placeholder="Ej: Zoro está descansando contra el mástil cuando el usuario se acerca..."></textarea>
+            <div class="ayuda">Describí la situación, no el mensaje en sí. La IA escribe el mensaje — vos solo decís qué está pasando.</div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="retroceder(4)">Atrás</button>
+            <button class="btn btn-ghost" onclick="enriquecerPaso('primer_mensaje', this)"><div class="spinner"></div><span class="btn-label">✦ Generar con IA</span></button>
+            <button class="btn btn-primary" onclick="avanzar(4)"><span class="btn-label">Continuar</span></button>
+        </div>
+        <div class="ia-result-wrap" id="result-primer_mensaje">
+            <div class="ia-result-label">Primer mensaje generado</div>
+            <div class="ia-result-box" id="result-primer_mensaje-texto" style="font-style:italic"></div>
+            <div class="btn-row" style="margin-top:10px">
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="usarResultado('primer_mensaje')">✓ Usar este mensaje</button>
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="enriquecerPaso('primer_mensaje', this)">Regenerar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PASO 5: Ejemplos ══════════════════════════════════════════ -->
+    <div class="step-card" id="step-5">
+        <h2 class="step-card-title">Ejemplos de conversación</h2>
+        <p class="step-card-hint">Ejemplos que enseñan al modelo cómo responde el personaje. Podés dejar vacío y la IA elige.</p>
+        <div class="callout">
+            <strong>¿Para qué sirven?</strong> Son como una "muestra" del personaje en acción. El modelo los lee para entender su voz, su ritmo y cómo reacciona. Cuanto más representativos, mejor se comporta en el chat.<br><br>
+            <strong>Si dejás vacío:</strong> la IA elige 2 situaciones representativas según la personalidad. Si escribís, elige situaciones basadas en lo que pedís.
+        </div>
+        <div class="form-group">
+            <label>Situaciones que querés ver (opcional)</label>
+            <textarea id="input-ejemplos" placeholder="Ej: Situación 1: el usuario está asustado antes de un combate. Situación 2: el usuario lo desafía..."></textarea>
+            <div class="ayuda">No escribas el diálogo — describí la situación y la IA escribe el intercambio completo. Podés pedir cosas como "cuando el usuario llora", "cuando hay tensión romántica", "cuando el usuario lo irrita".</div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="retroceder(5)">Atrás</button>
+            <button class="btn btn-ghost" onclick="enriquecerPaso('ejemplos', this)"><div class="spinner"></div><span class="btn-label">✦ Generar con IA</span></button>
+            <button class="btn btn-primary" onclick="avanzar(5)"><span class="btn-label">Continuar</span></button>
+        </div>
+        <div class="ia-result-wrap" id="result-ejemplos">
+            <div class="ia-result-label">Ejemplos generados</div>
+            <div class="ia-result-box" id="result-ejemplos-texto" style="font-size:0.9rem"></div>
+            <div class="btn-row" style="margin-top:10px">
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="usarResultado('ejemplos')">✓ Usar estos ejemplos</button>
+                <button class="btn btn-secondary" style="font-size:0.72rem" onclick="enriquecerPaso('ejemplos', this)">Regenerar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PASO 6: Tags ══════════════════════════════════════════════ -->
+    <div class="step-card" id="step-6">
+        <h2 class="step-card-title">Tags</h2>
+        <p class="step-card-hint">Palabras clave para categorizar el personaje. Podés escribirlos, dejar vacío, o combinar.</p>
+        <div class="callout">
+            <strong>¿Para qué sirven?</strong> Los tags categorizan al personaje para buscarlo y filtrarlo. No afectan el comportamiento en el chat.<br><br>
+            <strong>Qué poner:</strong> género de la historia (romance, acción, drama), rasgos del personaje (serio, protector, tsundere), tono (slow burn, comedia, dark), y si aplica, contenido (nsfw, explicito).
+        </div>
+        <div class="form-group">
+            <label>Tags (separados por comas, o vacío)</label>
+            <input type="text" id="input-tags" placeholder="Ej: pirata, serio, lealtad, slow burn, nsfw...">
+            <div class="ayuda">Si dejás vacío y usás "Sugerir con IA", la IA genera entre 6 y 10 tags basados en todo lo que completaste antes.</div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="retroceder(6)">Atrás</button>
+            <button class="btn btn-ghost" onclick="enriquecerPaso('tags', this)"><div class="spinner"></div><span class="btn-label">✦ Sugerir con IA</span></button>
+            <button class="btn btn-primary" onclick="avanzar(6)"><span class="btn-label">Continuar</span></button>
+        </div>
+        <div class="ia-result-wrap" id="result-tags">
+            <div class="ia-result-label">Tags sugeridos — click para activar/desactivar</div>
+            <div class="tags-preview" id="result-tags-chips"></div>
+        </div>
+    </div>
+
+    <!-- ═══ PASO 7: Revisar ════════════════════════════════════════ -->
+    <div class="step-card" id="step-7">
+        <h2 class="step-card-title">Revisar y guardar</h2>
+        <p class="step-card-hint">Revisá el resumen. Hacé click en cualquier campo para editarlo.</p>
+        <div class="resumen-grid" id="resumen-grid"></div>
+        <div class="btn-row" style="margin-top:26px">
+            <button class="btn btn-secondary" onclick="retroceder(7)">Atrás</button>
+            <button class="btn btn-ghost" onclick="descargarJSON()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span class="btn-label">Descargar JSON</span>
+            </button>
+            <button class="btn btn-primary" id="btn-guardar" onclick="guardarPersonaje()">
+                <div class="spinner"></div>
+                <span class="btn-label">✦ Crear personaje</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ Éxito ══════════════════════════════════════════════════ -->
+    <div class="success-screen" id="success-screen">
+        <div class="success-icon">✦</div>
+        <h2 class="success-title" id="success-nombre">Personaje creado</h2>
+        <p class="success-subtitle">Está listo para chatear.</p>
+        <div class="success-actions">
+            <a href="/" class="btn btn-primary">Ir al chat</a>
+            <button class="btn btn-secondary" onclick="reiniciar()">Crear otro</button>
+        </div>
+    </div>
+
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════════════════════
+
+let modoActual    = 'express';
+let nsfwActivo    = false;
+let modoMemoria   = 'roleplay';   // 'roleplay' | 'compañero'
+let modoManualStep = 1;
+
+const campos = {
+    nombre: '', descripcion: '', personalidad: '',
+    escenario: '', primer_mensaje: '', ejemplos: '',
+    tags: [], color_escenario: '#1a1a2e',
+};
+
+const pasoACampo = { 1:'descripcion', 2:'personalidad', 3:'escenario', 4:'primer_mensaje', 5:'ejemplos', 6:'tags' };
+let tagsSeleccionados = [];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NSFW
+// ═══════════════════════════════════════════════════════════════════════════
+
+function toggleNSFW() {
+    nsfwActivo = !nsfwActivo;
+    const wrap  = document.getElementById('nsfw-toggle');
+    const panel = document.getElementById('nsfw-panel');
+    const extra = document.getElementById('preguntas-nsfw-extra');
+
+    wrap.classList.toggle('activo', nsfwActivo);
+    panel.classList.toggle('visible', nsfwActivo);
+    if (extra) extra.style.display = nsfwActivo ? 'block' : 'none';
+}
+
+function toggleModoMemoria() {
+    modoMemoria = modoMemoria === 'roleplay' ? 'compañero' : 'roleplay';
+    const wrap  = document.getElementById('modo-toggle');
+    const label = document.getElementById('modo-toggle-label');
+    const desc  = document.getElementById('modo-toggle-desc');
+    const esCompanero = modoMemoria === 'compañero';
+
+    wrap.classList.toggle('companion', esCompanero);
+    label.textContent = esCompanero ? '💜 Modo: Compañero' : '🎭 Modo: Roleplay';
+    desc.textContent  = esCompanero
+        ? 'La IA recuerda datos del usuario Y momentos especiales de la relación'
+        : 'La IA solo recuerda datos reales del usuario, no acciones de ficción';
+}
+
+function getDatosNSFW() {
+    if (!nsfwActivo) return {};
+    return {
+        dinamica_intima : document.getElementById('nsfw-dinamica')?.value.trim() || '',
+        rol_dominante   : document.getElementById('nsfw-rol')?.value.trim() || '',
+        preferencias    : document.getElementById('nsfw-preferencias')?.value.trim() || '',
+        tono_nsfw       : document.getElementById('nsfw-tono')?.value.trim() || '',
+        limites         : document.getElementById('nsfw-limites')?.value.trim() || '',
+        escena_tipica   : document.getElementById('nsfw-escena')?.value.trim() || '',
+        // campos del formulario de preguntas
+        como_intimo     : document.getElementById('p-nsfw-como')?.value.trim() || '',
+        tension         : document.getElementById('p-nsfw-tension')?.value.trim() || '',
+        escenas_esp     : document.getElementById('p-nsfw-escenas')?.value.trim() || '',
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODO
+// ═══════════════════════════════════════════════════════════════════════════
+
+function seleccionarModo(modo) {
+    modoActual = modo;
+    ['express', 'preguntas', 'manual'].forEach(m => {
+        document.getElementById(`modo-${m}-btn`).classList.toggle('selected', m === modo);
+    });
+}
+
+function avanzarDesdeNombre() {
+    const nombre = document.getElementById('input-nombre').value.trim();
+    if (!nombre) { notif('Escribí un nombre para continuar', 'error'); return; }
+    campos.nombre = nombre;
+
+    document.getElementById('progress-manual').style.display = 'none';
+
+    if (modoActual === 'express') {
+        mostrarStep('step-express');
+    } else if (modoActual === 'preguntas') {
+        mostrarStep('step-preguntas');
+    } else {
+        mostrarStep('step-1');
+        document.getElementById('progress-manual').style.display = 'block';
+        modoManualStep = 1;
+        actualizarDots(1);
+    }
+}
+
+function volverA0() {
+    document.getElementById('progress-manual').style.display = 'none';
+    mostrarStep('step-0');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODO EXPRESS
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function ejecutarExpress(btn) {
+    const idea = document.getElementById('input-idea-base').value.trim();
+    if (idea.length < 20) { notif('Escribí al menos 20 caracteres', 'error'); return; }
+
+    const datos_nsfw = getDatosNSFW();
+    await ejecutarGeneracion(btn, '/api/crear/express', {
+        nombre: campos.nombre, idea_base: idea, nsfw: nsfwActivo, datos_nsfw
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODO PREGUNTAS
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function ejecutarPreguntas(btn) {
+    const respuestas = {
+        // Apariencia
+        altura_complexion : document.getElementById('p-altura')?.value.trim() || '',
+        cabello           : document.getElementById('p-cabello')?.value.trim() || '',
+        rasgos_faciales   : document.getElementById('p-rasgos')?.value.trim() || '',
+        vestimenta        : document.getElementById('p-vestimenta')?.value.trim() || '',
+        detalles_fisicos  : document.getElementById('p-detalles')?.value.trim() || '',
+        // Personalidad
+        forma_de_hablar   : document.getElementById('p-habla')?.value.trim() || '',
+        reacciones        : document.getElementById('p-reacciones')?.value.trim() || '',
+        humor             : document.getElementById('p-humor')?.value.trim() || '',
+        valores           : document.getElementById('p-valores')?.value.trim() || '',
+        miedos_deseos     : document.getElementById('p-miedos')?.value.trim() || '',
+        // Historia
+        origen            : document.getElementById('p-origen')?.value.trim() || '',
+        logros            : document.getElementById('p-logros')?.value.trim() || '',
+        historia          : document.getElementById('p-historia')?.value.trim() || '',
+        // Dinámica
+        relacion_usuario  : document.getElementById('p-vinculo')?.value.trim() || '',
+        como_trata        : document.getElementById('p-trato')?.value.trim() || '',
+        evolucion         : document.getElementById('p-evolucion')?.value.trim() || '',
+        // Escenario
+        lugar             : document.getElementById('p-lugar')?.value.trim() || '',
+        atmosfera         : document.getElementById('p-atmosfera')?.value.trim() || '',
+        objetos           : document.getElementById('p-objetos')?.value.trim() || '',
+    };
+
+    // Verificar que al menos un campo tenga valor
+    const tieneAlgo = Object.values(respuestas).some(v => v.length > 0);
+    if (!tieneAlgo) { notif('Completá al menos una pregunta', 'error'); return; }
+
+    const datos_nsfw = getDatosNSFW();
+    await ejecutarGeneracion(btn, '/api/crear/preguntas', {
+        nombre: campos.nombre, respuestas, nsfw: nsfwActivo, datos_nsfw
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FUNCIÓN COMÚN DE GENERACIÓN
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function ejecutarGeneracion(btn, endpoint, body) {
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    const overlay = document.getElementById('overlay-carga');
+    const msg     = document.getElementById('overlay-msg');
+    overlay.classList.add('show');
+
+    const mensajes = [
+        'Analizando el personaje...', 'Generando descripción...',
+        'Escribiendo personalidad en primera persona...',
+        'Construyendo el escenario...', 'Redactando el primer mensaje...',
+        'Creando ejemplos de conversación...', 'Finalizando la ficha...',
+    ];
+    let mi = 0;
+    msg.textContent = mensajes[0];
+    const interval = setInterval(() => { mi = (mi + 1) % mensajes.length; msg.textContent = mensajes[mi]; }, 1800);
+
+    try {
+        const resp = await fetch(endpoint, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await resp.json();
+        if (data.error) { notif(`Error: ${data.error}`, 'error'); return; }
+
+        const c = data.campos;
+
+        // Forzar string en todos los campos de texto (Mistral a veces devuelve arrays u objetos)
+        const toStr = v => {
+            if (!v) return '';
+            if (typeof v === 'string') return v;
+            if (Array.isArray(v)) return v.map(i => typeof i === 'object' ? JSON.stringify(i, null, 2) : String(i)).join('\n\n');
+            if (typeof v === 'object') return JSON.stringify(v, null, 2);
+            return String(v);
+        };
+
+        campos.descripcion    = toStr(c.descripcion);
+        campos.personalidad   = toStr(c.personalidad);
+        campos.escenario      = toStr(c.escenario);
+        campos.primer_mensaje = toStr(c.primer_mensaje);
+        campos.ejemplos       = toStr(c.ejemplos);
+        campos.tags           = Array.isArray(c.tags) ? c.tags.map(String) : [];
+        tagsSeleccionados     = [...campos.tags];
+
+        setVal('input-descripcion',    campos.descripcion);
+        setVal('input-personalidad',   campos.personalidad);
+        setVal('input-escenario',      campos.escenario);
+        setVal('input-primer_mensaje', campos.primer_mensaje);
+        setVal('input-ejemplos',       campos.ejemplos);
+        setVal('input-tags',           campos.tags.join(', '));
+
+        document.getElementById('progress-manual').style.display = 'none';
+        mostrarStep('step-7');
+        renderResumen();
+        notif('✦ Personaje generado', 'success');
+
+    } catch (err) {
+        notif('Error de conexión', 'error');
+        console.error(err);
+    } finally {
+        clearInterval(interval);
+        overlay.classList.remove('show');
+        btn.classList.remove('loading');
+        btn.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAVEGACIÓN MANUAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function avanzar(desde) {
+    guardarCampoActual(desde);
+    if (desde === 1 && !campos.descripcion.trim()) { notif('Completá la descripción para continuar', 'error'); return; }
+    const siguiente = desde + 1;
+    if (siguiente > 7) return;
+    modoManualStep = siguiente;
+    mostrarStep(`step-${siguiente}`);
+    actualizarDots(siguiente);
+    if (siguiente === 7) renderResumen();
+}
+
+function retroceder(desde) {
+    if (desde <= 1) { volverA0(); return; }
+    guardarCampoActual(desde);
+    modoManualStep = desde - 1;
+    mostrarStep(`step-${desde - 1}`);
+    actualizarDots(desde - 1);
+}
+
+function irAPaso(paso) {
+    document.getElementById('progress-manual').style.display = 'block';
+    modoManualStep = paso;
+    mostrarStep(`step-${paso}`);
+    actualizarDots(paso);
+    const campo = pasoACampo[paso];
+    if (campo && campo !== 'tags') {
+        const el = document.getElementById(`input-${campo}`);
+        if (el && campos[campo]) el.value = campos[campo];
+    }
+}
+
+function mostrarStep(id) {
+    document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function actualizarDots(activo) {
+    for (let i = 1; i <= 7; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (!dot) continue;
+        dot.classList.remove('active', 'done');
+        if (i < activo) dot.classList.add('done');
+        if (i === activo) dot.classList.add('active');
+    }
+}
+
+function guardarCampoActual(paso) {
+    const campo = pasoACampo[paso];
+    if (!campo) return;
+    if (campo === 'tags') {
+        campos.tags = tagsSeleccionados.length
+            ? [...tagsSeleccionados]
+            : document.getElementById('input-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+        return;
+    }
+    const el = document.getElementById(`input-${campo}`);
+    if (el) campos[campo] = el.value.trim();
+    if (paso === 3) campos.color_escenario = document.getElementById('input-color-escenario')?.value || '#1a1a2e';
+}
+
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENRIQUECIMIENTO INDIVIDUAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function enriquecerPaso(paso, btn) {
+    guardarCampoActual(modoManualStep);
+    const inputEl = document.getElementById(`input-${paso}`);
+    const valor   = inputEl ? inputEl.value.trim() : campos[paso] || '';
+    const opcionales = ['primer_mensaje', 'ejemplos', 'tags'];
+    if (!valor && !opcionales.includes(paso)) { notif('Escribí algo primero', 'error'); return; }
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+        const resp = await fetch('/api/crear/paso', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                paso, nombre: campos.nombre,
+                valor: valor || `Generar para ${campos.nombre}`,
+                contexto: {
+                    descripcion: campos.descripcion, personalidad: campos.personalidad,
+                    escenario: campos.escenario, primer_mensaje: campos.primer_mensaje,
+                },
+                nsfw: nsfwActivo,
+                datos_nsfw: getDatosNSFW(),
+            })
+        });
+        const data = await resp.json();
+        if (data.error) { notif(`Error: ${data.error}`, 'error'); return; }
+        mostrarResultado(paso, data.resultado);
+    } catch (err) {
+        notif('Error de conexión', 'error');
+    } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+    }
+}
+
+function mostrarResultado(paso, resultado) {
+    const wrap = document.getElementById(`result-${paso}`);
+    wrap.classList.add('visible');
+    if (paso === 'tags') {
+        const tags = Array.isArray(resultado) ? resultado : [];
+        tagsSeleccionados = [...tags];
+        renderTagChips(tags);
+        return;
+    }
+    document.getElementById(`result-${paso}-texto`).textContent = resultado;
+}
+
+function renderTagChips(tags) {
+    document.getElementById('result-tags-chips').innerHTML = tags.map(t =>
+        `<span class="tag-chip" onclick="toggleTag('${t.replace(/'/g,"\\'")}', this)">${t}</span>`
+    ).join('');
+}
+
+function toggleTag(tag, el) {
+    const idx = tagsSeleccionados.indexOf(tag);
+    if (idx >= 0) { tagsSeleccionados.splice(idx, 1); el.classList.add('desactivado'); }
+    else { tagsSeleccionados.push(tag); el.classList.remove('desactivado'); }
+}
+
+function usarResultado(paso) {
+    const textoEl = document.getElementById(`result-${paso}-texto`);
+    if (!textoEl) return;
+    const inputEl = document.getElementById(`input-${paso}`);
+    if (inputEl) inputEl.value = textoEl.textContent;
+    campos[paso] = textoEl.textContent;
+    notif('✦ Versión de IA aplicada', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RESUMEN
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderResumen() {
+    guardarCampoActual(modoManualStep);
+    const items = [
+        { titulo: 'Nombre',         valor: campos.nombre,         paso: 0 },
+        { titulo: 'Descripción',    valor: campos.descripcion,    paso: 1 },
+        { titulo: 'Personalidad',   valor: campos.personalidad,   paso: 2 },
+        { titulo: 'Escenario',      valor: campos.escenario,      paso: 3 },
+        { titulo: 'Primer mensaje', valor: campos.primer_mensaje, paso: 4 },
+        { titulo: 'Ejemplos',       valor: campos.ejemplos,       paso: 5 },
+        { titulo: 'Tags',           valor: (campos.tags || []).join(', '), paso: 6 },
+    ];
+    document.getElementById('resumen-grid').innerHTML = items.map(item => {
+        const valorStr = (item.valor != null && typeof item.valor !== 'string') ? String(item.valor) : (item.valor || '');
+        const ok = valorStr.trim().length > 0;
+        const preview = valorStr.length > 250 ? valorStr.slice(0,250)+'...' : valorStr;
+        return `<div class="resumen-item ${ok ? 'resumen-ok' : 'resumen-vacio'}" ${item.paso > 0 ? `onclick="irAPaso(${item.paso})"` : ''}>
+            <div class="resumen-item-titulo">${item.titulo}</div>
+            <div class="resumen-item-texto">${ok ? preview : '<em style="color:var(--text-muted)">Sin completar</em>'}</div>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GUARDAR
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function guardarPersonaje() {
+    if (!campos.nombre || !campos.descripcion) { notif('Nombre y descripción son obligatorios', 'error'); return; }
+    const btn = document.getElementById('btn-guardar');
+    btn.classList.add('loading'); btn.disabled = true;
+    try {
+        const resp = await fetch('/api/crear/finalizar', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nombre: campos.nombre, descripcion: campos.descripcion,
+                personalidad: campos.personalidad, escenario: campos.escenario,
+                primer_mensaje: campos.primer_mensaje, ejemplos: campos.ejemplos,
+                tags: campos.tags, notas: 'Creado con el asistente de personajes.',
+                color_escenario: campos.color_escenario,
+                modo_memoria: modoMemoria,
+            })
+        });
+        const data = await resp.json();
+        if (data.success) { window._lastCard = data.card; mostrarExito(campos.nombre); }
+        else notif(`Error: ${data.error}`, 'error');
+    } catch (err) {
+        notif('Error de conexión', 'error');
+    } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+    }
+}
+
+function mostrarExito(nombre) {
+    document.querySelectorAll('.step-card').forEach(c => c.style.display = 'none');
+    const pw = document.querySelector('.progress-wrap');
+    if (pw) pw.style.display = 'none';
+    document.getElementById('success-nombre').textContent = `"${nombre}" está listo`;
+    document.getElementById('success-screen').classList.add('show');
+}
+
+function reiniciar() { window.location.reload(); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DESCARGAR JSON
+// ═══════════════════════════════════════════════════════════════════════════
+
+function descargarJSON() {
+    guardarCampoActual(modoManualStep);
+    const card = {
+        spec: "chara_card_v2", spec_version: "2.0",
+        data: { name: campos.nombre, description: campos.descripcion, personality: campos.personalidad,
+                scenario: campos.escenario, first_mes: campos.primer_mensaje, mes_example: campos.ejemplos,
+                creator_notes: "Creado con el asistente de personajes.", tags: campos.tags,
+                character_version: "1.0", modo_memoria: modoMemoria }
+    };
+    const blob = new Blob([JSON.stringify(card, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `${campos.nombre || 'personaje'}.json`; a.click();
+    URL.revokeObjectURL(url);
+    notif('JSON descargado', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════════════
+
+let notifTimer = null;
+function notif(msg, tipo = 'info') {
+    const el = document.getElementById('notif');
+    el.textContent = msg; el.className = `notif ${tipo} show`;
+    if (notifTimer) clearTimeout(notifTimer);
+    notifTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+document.getElementById('input-idea-base').addEventListener('input', function() {
+    const n = this.value.length;
+    const el = document.getElementById('cc-idea');
+    el.textContent = `${n} / mín. 50`;
+    el.style.color = n >= 50 ? 'var(--success)' : 'var(--text-muted)';
+});
+
+document.getElementById('input-nombre').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); avanzarDesdeNombre(); }
+});
+</script>
+</body>
+</html>

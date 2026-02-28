@@ -1,0 +1,9 @@
+[
+  {"id":1,"nombre":"Neutral","patrones":[],"imagen":"1.png","es_default":true},
+  {"id":2,"nombre":"Riendo","patrones":["echa la cabeza hacia atrás al reír","ríe por lo bajo","suelta una carcajada seca","su sonrisa se ensancha","río en voz baja","dejo escapar una risa corta, sacudiendo la cabeza","niega con la cabeza mientras ríe","rio"],"imagen":"2.png","es_default":false},
+  {"id":3,"nombre":"Triste","patrones":["triste","tristeza","deprimido","extraño"],"imagen":"3.jpeg","es_default":false},
+  {"id":4,"nombre":"Anteojos","patrones":["acomoda las gafas","acomoda sus lentes","ajusta los lentes","empuja los lentes","toca sus lentes","lentes","ajusto mis gafas"],"imagen":"4.png","es_default":false},
+  {"id":5,"nombre":"Feliz","patrones":["feliz sonrisa","sonrío","feliz"],"imagen":"5.png","es_default":false},
+  {"id":6,"nombre":"Sonrojado","patrones":["se sonroja","mejillas rojas","te quiero","no sé dónde mirar","me sonrojo"],"imagen":"6.png","es_default":false},
+  {"id":7,"nombre":"Esquiva la mirada","patrones":["aparta la mirada","esquiva la mirada","miro a otro lado","miro a un lado","no miro","miro a un costado"],"imagen":"7.png","es_default":false}
+]

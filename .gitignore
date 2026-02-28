@@ -1,0 +1,54 @@
+# ═══════════════════════════════════════════════════════════════════════
+# .GITIGNORE — Hiro Chat
+# ═══════════════════════════════════════════════════════════════════════
+
+# ── Entorno virtual ──────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Variables de entorno ─────────────────────────────────────────────────
+.env
+
+# ── API keys y configuración sensible ────────────────────────────────────
+# El archivo real va en data/ y NO se sube al repo.
+# Solo se sube el ejemplo: data/api_config.example.json
+data/api_config.json
+data/modelos_activos.json
+data/libreria_modelos.json
+
+# ── Datos de usuario (memoria, historial, embeddings) ────────────────────
+data/personajes/*/memoria.db
+data/personajes/*/*.db
+data/personajes/*/embeddings.index
+data/personajes/*/embeddings_metadata.msgpack
+
+# ── Avatares subidos por el usuario ──────────────────────────────────────
+data/personajes/*/avatar.*
+
+# ── Personaje activo (cada usuario elige el suyo) ────────────────────────
+data/personaje_activo.json
+
+# ── Backups ──────────────────────────────────────────────────────────────
+backups/
+
+# ── Python ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# ── Sistema ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+
+# ── IDEs ─────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

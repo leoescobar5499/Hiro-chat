@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport clave para móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#050507">
+    <title>Escenarios - Panel Inmersivo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ─────────────────────────────────────────────────────────────────────────────
+           TEMA OSCURO Y VARIABLES
+           ───────────────────────────────────────────────────────────────────────────── */
+        :root {
+            --bg-base: #050507;
+            --bg-surface: #101014;
+            --bg-surface-hover: #18181e;
+            --bg-elevated: #1a1a21;
+            
+            --accent: #EBB34B;
+            --accent-dim: rgba(235, 179, 75, 0.15);
+            --accent-glow: rgba(235, 179, 75, 0.4);
+            
+            --text-primary: #F2F2F5;
+            --text-secondary: #9E9EA8;
+            --text-muted: #6B6B76;
+            
+            --border: #23232C;
+            --border-light: #30303A;
+            --danger: #ef4444;
+            
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --font-serif: 'Crimson Pro', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 15px var(--accent-glow);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(235, 179, 75, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─────────────────────────────────────────────────────────────────────────────
+           LAYOUT (Optimizado para Mobile)
+           ───────────────────────────────────────────────────────────────────────────── */
+        .page-container {
+            max-width: 680px;
+            margin: 0 auto;
+            /* Padding reducido para celulares */
+            padding: 30px 16px 80px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.5s ease-out;
+            flex-wrap: wrap; /* Permite que el título baje en pantallas MUY chicas si es necesario */
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin: 0;
+            background: linear-gradient(to right, #fff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0 0 24px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--border), transparent);
+        }
+
+        /* ─────────────────────────────────────────────────────────────────────────────
+           TARJETAS DE ESCENARIOS
+           ───────────────────────────────────────────────────────────────────────────── */
+        .card-escenario {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+        }
+
+        .card-escenario.activo {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-glow);
+            background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(235, 179, 75, 0.02) 100%);
+        }
+
+        .card-inner {
+            display: flex;
+            flex-direction: column; /* Apilado en móviles por defecto */
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .card-header-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(255,255,255,0.2);
+        }
+
+        .card-title-group {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 1.05rem;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        .card-historia {
+            padding: 0 16px 16px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            font-family: var(--font-serif);
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .badge-activo {
+            font-size: 0.65rem;
+            color: var(--bg-base);
+            background: var(--accent);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            font-family: var(--font-mono);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-tono {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-light);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        /* ─────────────────────────────────────────────────────────────────────────────
+           ACCIONES Y BOTONES (Optimizados para Touch)
+           ───────────────────────────────────────────────────────────────────────────── */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-light);
+            /* En móviles siempre visible */
+            opacity: 1; 
+        }
+
+        .btn-accion, .btn-delete {
+            flex: 1; /* Botones ocupan el mismo ancho en móviles */
+            padding: 10px;
+            height: 44px; /* Tamaño mínimo recomendado para touch */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-accion:active { background: var(--border); }
+        .btn-delete:active { background: rgba(239, 68, 68, 0.2); }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            height: 44px; /* Touch friendly */
+            box-sizing: border-box;
+        }
+
+        .btn-ia, .btn-guardar {
+            width: 100%; /* Ancho completo en móviles */
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 48px; /* Touch friendly */
+            box-sizing: border-box;
+        }
+
+        .btn-ia {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        .btn-ia:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-guardar {
+            background: var(--accent);
+            color: var(--bg-base);
+            border: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(235, 179, 75, 0.2);
+        }
+
+        /* ─────────────────────────────────────────────────────────────────────────────
+           FORMULARIOS Y MODALES
+           ───────────────────────────────────────────────────────────────────────────── */
+        .form-container {
+            background: var(--bg-surface);
+            padding: 20px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-top: 24px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px; /* Más padding para touch */
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: all 0.3s;
+            -webkit-appearance: none; /* Previene estilos nativos en iOS */
+        }
+        
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; /* Permite salto de línea en pantallas muy estrechas */
+            gap: 12px;
+            margin-bottom: 20px;
+            background: var(--bg-elevated);
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+            flex-shrink: 0;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; border: 2px solid var(--border); }
+
+        .form-actions-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* Modales */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(5, 5, 7, 0.85);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 16px; /* Evita que el modal toque los bordes del celular */
+            box-sizing: border-box;
+        }
+        .modal-overlay.open { 
+            display: flex; 
+            opacity: 1;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .modal-contenido {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh; /* Previene que sea más alto que la pantalla */
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-overlay.open .modal-contenido { transform: translateY(0) scale(1); }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-surface-hover);
+            flex-shrink: 0;
+        }
+        .modal-header h3 { margin: 0; font-weight: 500; font-size: 1.1rem; }
+        
+        .modal-cerrar {
+            background: none; border: none;
+            color: var(--text-secondary);
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0 8px;
+            line-height: 1;
+            height: 40px; /* Touch friendly */
+        }
+
+        .modal-body { 
+            padding: 20px; 
+            overflow-y: auto; /* Permite scroll interno si es muy largo */
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column; /* Apilado en móvil */
+            gap: 12px;
+            background: var(--bg-surface-hover);
+            flex-shrink: 0;
+        }
+
+        .btn-cancelar {
+            width: 100%;
+            padding: 12px 20px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            height: 48px;
+            box-sizing: border-box;
+        }
+
+        .notificacion {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            width: calc(100% - 32px);
+            max-width: 400px;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .notificacion.mostrar { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .notificacion-success { border-bottom: 3px solid #10b981; }
+        .notificacion-error { border-bottom: 3px solid var(--danger); }
+
+        /* ─────────────────────────────────────────────────────────────────────────────
+           MEDIA QUERIES (ADAPTACIÓN A ESCRITORIO/TABLET)
+           ───────────────────────────────────────────────────────────────────────────── */
+        @media (min-width: 600px) {
+            .page-container {
+                padding: 60px 24px 80px;
+            }
+            .page-title { font-size: 1.75rem; }
+            .form-container { padding: 24px; }
+            
+            /* En escritorio, las acciones se alinean a la derecha y los botones son más chicos */
+            .card-inner {
+                flex-direction: row;
+                align-items: center;
+            }
+            .card-info { flex: 1; }
+            .card-actions {
+                width: auto;
+                padding-top: 0;
+                border-top: none;
+                opacity: 0.7; /* Volvemos al efecto hover en Desktop */
+            }
+            .card-escenario:hover .card-actions { opacity: 1; }
+            
+            .btn-accion, .btn-delete {
+                flex: none;
+                width: 36px;
+                height: 36px;
+                padding: 6px;
+            }
+
+            .btn-accion:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+            .btn-delete:hover { color: var(--danger); border-color: rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.1); }
+            .back-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); transform: translateX(-4px); }
+            .btn-ia:hover:not(:disabled) { background: var(--accent-dim); box-shadow: var(--shadow-glow); }
+            .btn-guardar:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.1); }
+            .btn-cancelar:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+            /* Botones del formulario en línea en Desktop */
+            .form-actions-wrapper {
+                flex-direction: row;
+            }
+            .form-actions-wrapper .btn-ia { width: auto; }
+            .form-actions-wrapper .btn-guardar { flex: 1; }
+            
+            /* Botones del modal en línea en Desktop */
+            .modal-footer {
+                flex-direction: row;
+                justify-content: flex-end;
+            }
+            .modal-footer button { width: auto; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+
+        <div class="page-header">
+            <a href="/" class="back-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Volver
+            </a>
+            <h1 class="page-title">Escenarios</h1>
+        </div>
+
+        <p class="page-subtitle">
+            El escenario activo define el lugar y la historia compartida de la conversación. Activá uno para que el personaje se ubique espacialmente.
+        </p>
+
+        <!-- Escenario default -->
+        <div class="section-label">✨ ESCENARIO BASE</div>
+        <div class="card-escenario" id="escenario-default-card" onclick="activarEscenario(0)">
+            <div class="card-inner">
+                <div class="card-info">
+                    <div class="card-header-row">
+                        <div style="font-size:1.8rem; background: var(--bg-elevated); width: 44px; height: 44px; display:flex; align-items:center; justify-content:center; border-radius: 10px; border: 1px solid var(--border);">🏠</div>
+                        <div>
+                            <div class="card-title-group">
+                                El origen del personaje
+                                <span id="badge-default" style="display:none" class="badge-activo">ACTIVO</span>
+                            </div>
+                            <div class="card-desc">El entorno nativo definido en su ficha de memoria.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de escenarios personalizados -->
+        <div class="section-label" style="margin-top: 40px;">🌌 MIS ENTORNOS CREADOS</div>
+        <div id="listaEscenarios">
+            <!-- Se llenará vía JS -->
+        </div>
+
+        <!-- Formulario nuevo escenario -->
+        <div class="form-container">
+            <div class="section-label" style="margin-bottom: 20px;">✦ CREAR NUEVO ESCENARIO</div>
+
+            <input type="text" id="nuevo-escenario-nombre" class="form-input"
+                placeholder="Nombre del lugar (ej: Cafetería)">
+            
+            <textarea id="nuevo-escenario-desc" class="form-input"
+                placeholder="Describe los detalles visuales, olores, sonidos y sensaciones..."></textarea>
+            
+            <textarea id="nuevo-escenario-historia" class="form-input"
+                placeholder="¿Qué historia tiene este lugar? (Opcional)"></textarea>
+
+            <input type="text" id="nuevo-escenario-tono" class="form-input"
+                list="tonos-sugeridos"
+                placeholder="Tono emocional (ej: oscuro y tenso, íntimo y cálido) — Opcional">
+            <datalist id="tonos-sugeridos">
+                <option value="oscuro y melancólico">
+                <option value="íntimo y cálido">
+                <option value="tenso y misterioso">
+                <option value="alegre y desenfadado">
+                <option value="romántico y nostálgico">
+                <option value="frenético y peligroso">
+                <option value="tranquilo y contemplativo">
+                <option value="onírico y surreal">
+            </datalist>
+
+            <textarea id="nuevo-escenario-instruccion" class="form-input" style="min-height:80px"
+                placeholder="Instrucción extra para el personaje (ej: Habla en voz baja, hay lluvia de fondo) — Opcional"></textarea>
+
+            <div class="color-picker-wrapper">
+                <label style="font-size:0.85rem; color:var(--text-secondary); font-weight: 500; flex:1;">Aura del entorno:</label>
+                <input type="color" id="nuevo-escenario-color" value="#8b5cf6"
+                    oninput="document.getElementById('esc-color-preview').style.background=this.value; document.getElementById('esc-color-preview').style.boxShadow = `0 0 15px ${this.value}40`">
+                <div id="esc-color-preview" style="flex:2; min-width:100px; height:40px; border-radius:8px; background:#8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); display:flex; align-items:center; justify-content:center; transition: all 0.3s;">
+                    <span style="font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:var(--font-mono); mix-blend-mode: overlay;">Luz</span>
+                </div>
+            </div>
+
+            <div class="form-actions-wrapper">
+                <button id="btn-generar-escenario" class="btn-ia" onclick="generarEscenarioIA()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg>
+                    Autocompletar con IA
+                </button>
+                <button class="btn-guardar" onclick="crearEscenario()">
+                    Guardar Escenario
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal editar escenario -->
+    <div id="modalEditarEscenario" class="modal-overlay">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <h3>Editar Escenario</h3>
+                <button class="modal-cerrar" onclick="cerrarModalEditar()">×</button>
+            </div>
+            <div class="modal-body">
+                <input id="edit-esc-nombre" type="text" class="form-input" placeholder="Nombre">
+                <textarea id="edit-esc-desc" class="form-input" placeholder="Descripción del ambiente"></textarea>
+                <textarea id="edit-esc-historia" class="form-input" placeholder="Historia de este lugar..."></textarea>
+
+                <input id="edit-esc-tono" type="text" class="form-input"
+                    list="tonos-sugeridos"
+                    placeholder="Tono emocional (opcional)">
+                <textarea id="edit-esc-instruccion" class="form-input" style="min-height:80px"
+                    placeholder="Instrucción extra para el personaje (opcional)"></textarea>
+
+                <div class="color-picker-wrapper" style="margin-bottom:0; margin-top: 8px;">
+                    <label style="font-size:0.85rem; color:var(--text-secondary); flex:1;">Color:</label>
+                    <input type="color" id="edit-esc-color"
+                        oninput="document.getElementById('edit-esc-preview').style.background=this.value">
+                    <div id="edit-esc-preview" style="flex:2; height:40px; border-radius:8px; border:1px solid rgba(255,255,255,0.1)"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModalEditar()">Cancelar</button>
+                <button class="btn-guardar" id="btn-guardar-edicion" onclick="guardarEdicionEscenario()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal memorias del escenario -->
+    <div id="modalMemorias" class="modal-overlay">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <h3 id="modalMemoriasTitle" style="display:flex; align-items:center; gap:8px;">💭 Recuerdos</h3>
+                <button class="modal-cerrar" onclick="cerrarModalMemorias()">×</button>
+            </div>
+            <div class="modal-body" style="padding-right: 16px;">
+                <div id="modalMemoriasBody"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-guardar" onclick="cerrarModalMemorias()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    
+
+    <!-- ─────────────────────────────────────────────────────────────────────────────
+         JAVASCRIPT INTEGRADO
+         ───────────────────────────────────────────────────────────────────────────── -->
+    <script>
+        let _editandoEid = null;
+        
+        // Mock de datos para poder previsualizarlo sin servidor
+        let localEscenarios = JSON.parse(localStorage.getItem('escenarios_mock')) || [
+            { id: 1, nombre: "Cyberpunk Bar", descripcion: "Un bar oscuro con luces de neón magenta y lluvia constante afuera. El olor a ozono y licor sintético flota en el aire.", historia: "Nuestro punto de encuentro habitual después de los encargos corporativos.", color: "#d946ef", activo: false },
+            { id: 2, nombre: "Bosque de los Susurros", descripcion: "Árboles colosales cuyas hojas brillan con bioluminiscencia dorada. La niebla se arrastra por el suelo musgoso.", historia: "El lugar donde encontramos el artefacto antiguo.", color: "#f59e0b", activo: true }
+        ];
+        
+        const saveLocal = () => localStorage.setItem('escenarios_mock', JSON.stringify(localEscenarios));
+
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            const notif = document.createElement('div');
+            notif.className = `notificacion notificacion-${tipo}`;
+            const icon = tipo === 'success' ? '✅' : (tipo === 'error' ? '❌' : 'ℹ️');
+            notif.innerHTML = `<span>${icon}</span> <span>${mensaje}</span>`;
+            
+            document.body.appendChild(notif);
+            setTimeout(() => notif.classList.add('mostrar'), 10);
+            setTimeout(() => {
+                notif.classList.remove('mostrar');
+                setTimeout(() => notif.remove(), 300);
+            }, 4000);
+        }
+
+        async function cargarEscenarios() {
+            const lista   = document.getElementById('listaEscenarios');
+            const badgeD  = document.getElementById('badge-default');
+            const defCard = document.getElementById('escenario-default-card');
+            
+            lista.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Cargando...</div>';
+
+            let escenas = [];
+            try {
+                const resp = await fetch('/api/escenarios');
+                if(!resp.ok) throw new Error("API fallback");
+                escenas = await resp.json();
+            } catch { escenas = localEscenarios; }
+
+            const hayActivo = escenas.some(e => e.activo);
+            
+            if (badgeD) badgeD.style.display = hayActivo ? 'none' : 'inline-flex';
+            if (defCard) {
+                if(hayActivo) defCard.classList.remove('activo');
+                else defCard.classList.add('activo');
+            }
+
+            if (!escenas.length) {
+                lista.innerHTML = `
+                    <div style="text-align:center; padding:30px 16px; background:var(--bg-surface); border-radius:12px; border:1px dashed var(--border);">
+                        <p style="color:var(--text-secondary); margin:0;">Aún no hay escenarios.</p>
+                    </div>`;
+                return;
+            }
+
+            lista.innerHTML = escenas.map(e => `
+                <div class="card-escenario ${e.activo ? 'activo' : ''}">
+                    <div class="card-inner">
+                        <div class="card-info" onclick="activarEscenario(${e.id})">
+                            <div class="card-header-row">
+                                ${e.color ? `<div class="color-indicator" style="background:${e.color}; box-shadow: 0 0 10px ${e.color}80"></div>` : ''}
+                                <div class="card-title-group">
+                                    ${e.nombre}
+                                    ${e.activo ? '<span class="badge-activo">ACTIVO</span>' : ''}
+                                    ${e.tono   ? `<span class="badge-tono">${e.tono}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="card-desc">${e.descripcion}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-accion" onclick="verMemorias(${e.id}, '${e.nombre.replace(/'/g,"\\'")}')">💭 Memorias</button>
+                            <button class="btn-accion btn-editar-esc"
+                                data-eid="${e.id}" data-nombre="${e.nombre.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
+                                data-desc="${e.descripcion.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
+                                data-historia="${(e.historia||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
+                                data-tono="${(e.tono||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
+                                data-instruccion="${(e.instruccion||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
+                                data-color="${(e.color||'').replace(/"/g,'&quot;')}">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn-delete" onclick="eliminarEscenario(${e.id})">🗑️ Borrar</button>
+                        </div>
+                    </div>
+                    ${e.historia ? `<div class="card-historia">«${e.historia}»</div>` : ''}
+                </div>`).join('');
+
+            lista.querySelectorAll('.btn-editar-esc').forEach(btn => {
+                btn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    abrirModalEditar(parseInt(btn.dataset.eid), btn.dataset.nombre, btn.dataset.desc, btn.dataset.historia || '', btn.dataset.tono || '', btn.dataset.instruccion || '', btn.dataset.color || '');
+                });
+            });
+        }
+
+        async function activarEscenario(eid) {
+            try {
+                const resp = await fetch(`/api/escenarios/${eid}/activar`, { method: 'POST' });
+                if(!resp.ok) throw new Error("Fallback");
+                const data = await resp.json();
+                mostrarNotificacion(data.nombre ? `Activo: ${data.nombre}` : 'Regresando a base', 'success');
+            } catch {
+                localEscenarios.forEach(esc => esc.activo = (esc.id === eid));
+                saveLocal();
+                mostrarNotificacion(`Escenario activo`, 'success');
+            }
+            cargarEscenarios();
+        }
+
+        async function generarEscenarioIA() {
+            const nombre = document.getElementById('nuevo-escenario-nombre').value.trim();
+            const idea   = document.getElementById('nuevo-escenario-desc').value.trim();
+            if (!nombre && !idea) { mostrarNotificacion('Escribe nombre o idea inicial', 'error'); return; }
+            
+            const btn = document.getElementById('btn-generar-escenario');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando...';
+            btn.disabled = true;
+            
+            try {
+                const resp = await fetch('/api/escenarios/generar', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: nombre || 'Lugar misterioso', idea }),
+                });
+                if(!resp.ok) throw new Error("Fallback");
+                const data = await resp.json();
+                if (data.success) {
+                    if (data.descripcion) document.getElementById('nuevo-escenario-desc').value       = data.descripcion;
+                    if (data.historia)    document.getElementById('nuevo-escenario-historia').value   = data.historia;
+                    if (data.tono)        document.getElementById('nuevo-escenario-tono').value       = data.tono;
+                    if (data.instruccion) document.getElementById('nuevo-escenario-instruccion').value = data.instruccion;
+                }
+            } catch {
+                setTimeout(() => {
+                    document.getElementById('nuevo-escenario-desc').value = `Un ambiente envuelto en sombras donde la luz lucha por penetrar...`;
+                    document.getElementById('nuevo-escenario-historia').value = `Un lugar aislado del tiempo.`;
+                    btn.innerHTML = originalText; btn.disabled = false;
+                }, 1000);
+                return;
+            }
+            btn.innerHTML = originalText; btn.disabled = false;
+        }
+
+        async function crearEscenario() {
+            const nombre      = document.getElementById('nuevo-escenario-nombre').value.trim();
+            const desc        = document.getElementById('nuevo-escenario-desc').value.trim();
+            const historia    = document.getElementById('nuevo-escenario-historia').value.trim();
+            const tono        = document.getElementById('nuevo-escenario-tono')?.value.trim()        || '';
+            const instruccion = document.getElementById('nuevo-escenario-instruccion')?.value.trim() || '';
+            const color       = document.getElementById('nuevo-escenario-color')?.value || '#8b5cf6';
+            
+            if (!nombre || !desc) { mostrarNotificacion('Nombre y descripción obligatorios', 'error'); return; }
+            
+            try {
+                const resp = await fetch('/api/escenarios', {
+                    method : 'POST', headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({ nombre, descripcion: desc, historia, tono, instruccion, color }),
+                });
+                if(!resp.ok) throw new Error("Fallback");
+            } catch {
+                localEscenarios.push({ id: Date.now(), nombre, descripcion: desc, historia, tono, instruccion, color, activo: false });
+                saveLocal();
+            }
+            
+            document.getElementById('nuevo-escenario-nombre').value      = '';
+            document.getElementById('nuevo-escenario-desc').value        = '';
+            document.getElementById('nuevo-escenario-historia').value    = '';
+            document.getElementById('nuevo-escenario-tono').value        = '';
+            document.getElementById('nuevo-escenario-instruccion').value = '';
+            cargarEscenarios();
+            mostrarNotificacion('Escenario creado', 'success');
+        }
+
+        function abrirModalEditar(eid, nombre, desc, historia, tono, instruccion, color) {
+            _editandoEid = eid;
+            const c = color || '#8b5cf6';
+            document.getElementById('edit-esc-nombre').value      = nombre;
+            document.getElementById('edit-esc-desc').value        = desc;
+            document.getElementById('edit-esc-historia').value    = historia;
+            document.getElementById('edit-esc-tono').value        = tono;
+            document.getElementById('edit-esc-instruccion').value = instruccion;
+            document.getElementById('edit-esc-color').value       = c;
+            document.getElementById('edit-esc-preview').style.background = c;
+            document.getElementById('modalEditarEscenario').classList.add('open');
+        }
+
+        function cerrarModalEditar() {
+            document.getElementById('modalEditarEscenario').classList.remove('open');
+            _editandoEid = null;
+        }
+
+        async function guardarEdicionEscenario() {
+            if (!_editandoEid) return;
+            const nombre      = document.getElementById('edit-esc-nombre').value.trim();
+            const desc        = document.getElementById('edit-esc-desc').value.trim();
+            const historia    = document.getElementById('edit-esc-historia').value.trim();
+            const tono        = document.getElementById('edit-esc-tono')?.value.trim()        || '';
+            const instruccion = document.getElementById('edit-esc-instruccion')?.value.trim() || '';
+            const color       = document.getElementById('edit-esc-color')?.value || '';
+            
+            if (!nombre || !desc) return;
+            
+            try {
+                const resp = await fetch(`/api/escenarios/${_editandoEid}`, {
+                    method : 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({ nombre, descripcion: desc, historia, tono, instruccion, color }),
+                });
+                if(!resp.ok) throw new Error("Fallback");
+            } catch {
+                const i = localEscenarios.findIndex(e => e.id === _editandoEid);
+                if(i > -1) { localEscenarios[i] = { ...localEscenarios[i], nombre, descripcion: desc, historia, tono, instruccion, color }; saveLocal(); }
+            }
+            cerrarModalEditar();
+            cargarEscenarios();
+            mostrarNotificacion('Actualizado', 'success');
+        }
+
+        async function eliminarEscenario(eid) {
+            if (!confirm('¿Eliminar este escenario?')) return;
+            try {
+                const resp = await fetch(`/api/escenarios/${eid}`, { method: 'DELETE' });
+                if(!resp.ok) throw new Error("Fallback");
+            } catch {
+                localEscenarios = localEscenarios.filter(e => e.id !== eid); saveLocal();
+            }
+            cargarEscenarios();
+            mostrarNotificacion('Eliminado', 'success');
+        }
+
+        async function verMemorias(eid, nombre) {
+            document.getElementById('modalMemoriasTitle').innerHTML = `💭 Memorias en <span style="color:var(--accent); margin-left:6px">${nombre}</span>`;
+            const bodyDiv = document.getElementById('modalMemoriasBody');
+            bodyDiv.innerHTML = '<div style="text-align:center; padding: 20px;">Cargando...</div>';
+            document.getElementById('modalMemorias').classList.add('open');
+
+            let eps = [], total = 0;
+            try {
+                const resp = await fetch(`/api/escenarios/${eid}/memorias`);
+                if(!resp.ok) throw new Error("Fallback");
+                const data = await resp.json();
+                eps = data.episodios || []; total = data.total || 0;
+            } catch {
+                eps = [{ fecha: "2023-10-15 22:30", emocion: "Nostalgia", resumen: "Hablamos sobre cómo las cosas solían ser." }]; total = 1;
+            }
+
+            bodyDiv.innerHTML = eps.length === 0
+                ? '<div style="padding:20px; text-align:center; color:var(--text-secondary);">No hay recuerdos aquí aún.</div>'
+                : `<p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">${total} recuerdo(s).</p>` +
+                  eps.map(ep => `<div style="background:var(--bg-elevated); border-radius:12px; padding:16px; border-left:4px solid var(--accent); margin-bottom:12px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">${ep.fecha?.substring(0,16) || ''}</div>
+                        <div style="font-size:0.95rem; color:var(--text-primary);">${ep.resumen || ''}</div>
+                    </div>`).join('');
+        }
+
+        function cerrarModalMemorias() { document.getElementById('modalMemorias').classList.remove('open'); }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarEscenarios();
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if(e.target === modal) { modal.classList.remove('open'); _editandoEid = null; }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

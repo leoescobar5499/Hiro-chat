@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre vos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style_sobre_vos.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="sv-header">
+        <a href="/" class="sv-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Volver al chat
+        </a>
+
+        <h1>Lo que <span id="personajeName">·</span> sabe de vos</h1>
+
+        <!-- MENÚ 3 PUNTOS -->
+        <div id="wrapperOpciones">
+            <button id="btnOpciones" class="sv-btn-opciones" title="Opciones">···</button>
+            <div id="menuOpciones" class="sv-menu">
+                <button class="sv-menu-item" onclick="abrirModalImpExp(); cerrarMenuOpciones()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                        <polyline points="17 3 12 8 7 3" transform="translate(0,1)"></polyline>
+                    </svg>
+                    Importar / Exportar
+                </button>
+                <div class="sv-menu-divider"></div>
+                <button class="sv-menu-item sv-menu-danger" onclick="borrarTodaMemoria()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                    </svg>
+                    Borrar toda la memoria
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="sv-container">
+        <div id="perfilContent" class="sv-content">
+            <div class="sv-loading">
+                <div class="sv-loading-icon">⏳</div>
+                Cargando...
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE EDICIÓN -->
+    <div id="editModal" class="sv-modal" onclick="if(event.target===this) cerrarModal()">
+        <div class="sv-modal-inner">
+            <div class="sv-modal-header">
+                <h2 id="editModalTitle">Editar</h2>
+                <button class="sv-modal-close" onclick="cerrarModal()">✕</button>
+            </div>
+            <div class="sv-modal-body">
+                <label class="sv-label" for="editValor">Valor</label>
+                <textarea id="editValor" class="sv-textarea"></textarea>
+            </div>
+            <div class="sv-modal-footer">
+                <button class="sv-btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="sv-btn-save" onclick="guardarEdicion()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICACIONES -->
+    <div id="toast" class="sv-toast"></div>
+
+
+    <!-- MODAL IMPORTAR / EXPORTAR -->
+    <div id="modalImpExp" class="sv-modal" onclick="if(event.target===this) cerrarModalImpExp()">
+        <div class="sv-modal-inner sv-modal-impexp">
+            <div class="sv-modal-header">
+                <h2>⬆⬇ Importar / Exportar</h2>
+                <button class="sv-modal-close" onclick="cerrarModalImpExp()">✕</button>
+            </div>
+            <div class="sv-modal-body">
+                <p class="sv-impexp-desc">Exportá cualquier tabla como JSON para hacer un backup. Para importar, seleccioná un archivo JSON generado por esta misma herramienta. Solo se admiten archivos <code>.json</code>.</p>
+
+                <div class="sv-impexp-table">
+                    <!-- BACKUP COMPLETO -->
+                    <div class="sv-impexp-row sv-impexp-highlight">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">💾</span>
+                            <div>
+                                <div class="sv-impexp-name">Backup completo</div>
+                                <div class="sv-impexp-sub">Todas las tablas en un solo archivo</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('completo')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('completo', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="sv-impexp-separator">Tablas individuales</div>
+
+                    <!-- CHAT -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">💬</span>
+                            <div>
+                                <div class="sv-impexp-name">Chat</div>
+                                <div class="sv-impexp-sub">Historial completo de mensajes</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('chat')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('chat', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- MEMORIA -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">🧠</span>
+                            <div>
+                                <div class="sv-impexp-name">Memoria</div>
+                                <div class="sv-impexp-sub">Hechos aprendidos + síntesis</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('memoria')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('memoria', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- EPISÓDICA -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">📖</span>
+                            <div>
+                                <div class="sv-impexp-name">Memoria episódica</div>
+                                <div class="sv-impexp-sub">Recuerdos de conversaciones</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('episodica')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('episodica', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- RELACIÓN -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">💝</span>
+                            <div>
+                                <div class="sv-impexp-name">Relación</div>
+                                <div class="sv-impexp-sub">Fase, confianza, intimidad, hilos</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('relacion')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('relacion', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ESCENARIOS -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">🏙️</span>
+                            <div>
+                                <div class="sv-impexp-name">Escenarios</div>
+                                <div class="sv-impexp-sub">Lugares y contextos de roleplay</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('escenarios')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('escenarios', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- EVENTOS -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">⚡</span>
+                            <div>
+                                <div class="sv-impexp-name">Eventos</div>
+                                <div class="sv-impexp-sub">Disparadores y eventos narrativos</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('eventos')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('eventos', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- OBJETOS -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">🎒</span>
+                            <div>
+                                <div class="sv-impexp-name">Objetos</div>
+                                <div class="sv-impexp-sub">Objetos del inventario y cambios pendientes</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('objetos')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('objetos', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- DIARIOS -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">📔</span>
+                            <div>
+                                <div class="sv-impexp-name">Diarios</div>
+                                <div class="sv-impexp-sub">Entradas del diario del personaje</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('diarios')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('diarios', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- EVOLUCIÓN -->
+                    <div class="sv-impexp-row">
+                        <div class="sv-impexp-info">
+                            <span class="sv-impexp-icon">🌱</span>
+                            <div>
+                                <div class="sv-impexp-name">Evolución</div>
+                                <div class="sv-impexp-sub">Descripción de cada fase de la relación</div>
+                            </div>
+                        </div>
+                        <div class="sv-impexp-actions">
+                            <button class="sv-impexp-btn sv-impexp-export" onclick="impExpExportar('evolucion')">⬇ Exportar</button>
+                            <label class="sv-impexp-btn sv-impexp-import">
+                                ⬆ Importar
+                                <input type="file" accept=".json" style="display:none" onchange="impExpImportar('evolucion', this)">
+                            </label>
+                        </div>
+                    </div>
+
+                </div><!-- /.sv-impexp-table -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script_sobre_vos.js"></script>
+</body>
+</html>

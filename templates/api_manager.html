@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de APIs - Hiro Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style_api_manager.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="api-header">
+        <a href="/" class="api-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Volver
+        </a>
+
+        <h1>⚙️ Gestor de APIs</h1>
+
+        <div class="api-header-actions">
+            <button class="api-btn-test" onclick="testearTodoslosModelos()" title="Probar conexión">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Verificar conexiones
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="api-container">
+        
+        <!-- TABS DE NAVEGACIÓN -->
+        <div class="api-tabs">
+            <button class="api-tab-btn active" data-tab="configuracion" onclick="switchTab('configuracion')">
+                🔑 Configuración de APIs
+            </button>
+            <button class="api-tab-btn" data-tab="modelos" onclick="switchTab('modelos')">
+                🤖 Modelos por Tarea
+            </button>
+            <button class="api-tab-btn" data-tab="seguridad" onclick="switchTab('seguridad')">
+                🛡️ Seguridad & Fallbacks
+            </button>
+            <button class="api-tab-btn" data-tab="libreria" onclick="switchTab('libreria')">
+                📚 Mi Librería de Modelos
+            </button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- TAB 1: CONFIGURACIÓN DE APIs                                    -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="api-tab-content active" id="tab-configuracion">
+            <div class="api-info-alert" style="margin-bottom: 1.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>Los proveedores <strong>Chat/LLM</strong> (Mistral, OpenRouter) gestionan las respuestas del personaje. Los proveedores de <strong>Embeddings</strong> (OpenAI, Cohere, Jina, Ollama) vectorizan la memoria. Podés mezclarlos libremente.</span>
+            </div>
+
+            <div class="api-grid">
+                
+                <!-- ── MISTRAL AI ─────────────────────────────────────────── -->
+                <div class="api-card api-card--mistral">
+                    <div class="api-card-header">
+                        <h2>🟠 Mistral AI</h2>
+                        <span class="api-badge api-badge--proveedor">Chat + Embeddings</span>
+                    </div>
+                    <div class="api-card-body">
+                        <div class="api-form-group">
+                            <label class="api-label">
+                                <input type="checkbox" id="mistral-enabled" class="api-checkbox" onchange="toggleProvider('mistral')">
+                                <span>Activar Mistral</span>
+                            </label>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">API Key</label>
+                            <div class="api-input-wrapper">
+                                <input type="password" id="mistral-key" class="api-input" placeholder="sk-..." onchange="saveConfig()">
+                                <button class="api-btn-toggle-pwd" onclick="togglePasswordField('mistral-key')">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <p class="api-hint">Obtenla en <a href="https://console.mistral.ai/api-keys/" target="_blank">console.mistral.ai</a></p>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">Endpoint Base (opcional)</label>
+                            <input type="text" id="mistral-endpoint" class="api-input" placeholder="https://api.mistral.ai/v1" onchange="saveConfig()">
+                        </div>
+                        <div class="api-status" id="mistral-status">
+                            <span class="api-status-dot"></span>No configurado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── OPENROUTER ─────────────────────────────────────────── -->
+                <div class="api-card api-card--openrouter">
+                    <div class="api-card-header">
+                        <h2>🌐 OpenRouter</h2>
+                        <span class="api-badge api-badge--fallback">Chat / Sin Censura</span>
+                    </div>
+                    <div class="api-card-body">
+                        <div class="api-form-group">
+                            <label class="api-label">
+                                <input type="checkbox" id="openrouter-enabled" class="api-checkbox" onchange="toggleProvider('openrouter')">
+                                <span>Activar OpenRouter</span>
+                            </label>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">API Key</label>
+                            <div class="api-input-wrapper">
+                                <input type="password" id="openrouter-key" class="api-input" placeholder="sk-or-..." onchange="saveConfig()">
+                                <button class="api-btn-toggle-pwd" onclick="togglePasswordField('openrouter-key')">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <p class="api-hint">Obtenla en <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai</a></p>
+                        </div>
+                        <div class="api-info-box">
+                            <p><strong>Ventaja:</strong> Acceso a modelos sin censura (Hermes, Llama, Mixtral uncensored, etc.)</p>
+                            <p><strong>Caso de uso:</strong> Roleplay sin restricciones, fallback automático.</p>
+                        </div>
+                        <div class="api-status" id="openrouter-status">
+                            <span class="api-status-dot"></span>No configurado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── OPENAI ─────────────────────────────────────────────── -->
+                <div class="api-card" style="border-color: rgba(16,163,127,0.3);">
+                    <div class="api-card-header">
+                        <h2>🟢 OpenAI</h2>
+                        <span class="api-badge" style="background:rgba(16,163,127,0.15); color:#10a37f; border-color:rgba(16,163,127,0.3);">Embeddings Premium</span>
+                    </div>
+                    <div class="api-card-body">
+                        <div class="api-form-group">
+                            <label class="api-label">
+                                <input type="checkbox" id="openai-enabled" class="api-checkbox" onchange="saveConfig()">
+                                <span>Activar OpenAI</span>
+                            </label>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">API Key</label>
+                            <div class="api-input-wrapper">
+                                <input type="password" id="openai-key" class="api-input" placeholder="sk-..." onchange="saveConfig()">
+                                <button class="api-btn-toggle-pwd" onclick="togglePasswordField('openai-key')">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <p class="api-hint">Obtenla en <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">Endpoint (opcional, para proxies)</label>
+                            <input type="text" id="openai-endpoint" class="api-input" placeholder="https://api.openai.com/v1" onchange="saveConfig()">
+                        </div>
+                        <div class="api-info-box">
+                            <p><strong>Uso:</strong> Embeddings únicamente. <code>text-embedding-3-small</code> es barato y muy bueno.</p>
+                            <p><strong>Dimensiones:</strong> 1536 (small/ada) · 3072 (large)</p>
+                        </div>
+                        <div class="api-status" id="openai-status">
+                            <span class="api-status-dot"></span>No configurado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── COHERE ─────────────────────────────────────────────── -->
+                <div class="api-card" style="border-color: rgba(100,149,237,0.3);">
+                    <div class="api-card-header">
+                        <h2>🔵 Cohere</h2>
+                        <span class="api-badge" style="background:rgba(100,149,237,0.15); color:#6495ed; border-color:rgba(100,149,237,0.3);">Mejor para Español</span>
+                    </div>
+                    <div class="api-card-body">
+                        <div class="api-form-group">
+                            <label class="api-label">
+                                <input type="checkbox" id="cohere-enabled" class="api-checkbox" onchange="saveConfig()">
+                                <span>Activar Cohere</span>
+                            </label>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">API Key</label>
+                            <div class="api-input-wrapper">
+                                <input type="password" id="cohere-key" class="api-input" placeholder="co-..." onchange="saveConfig()">
+                                <button class="api-btn-toggle-pwd" onclick="togglePasswordField('cohere-key')">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <p class="api-hint">Obtenla en <a href="https://dashboard.cohere.com/api-keys" target="_blank">dashboard.cohere.com</a></p>
+                        </div>
+                        <div class="api-info-box">
+                            <p><strong>⭐ Recomendado para español.</strong> <code>embed-multilingual-v3.0</code> es excelente en español.</p>
+                            <p><strong>Dimensiones:</strong> 1024 — compatible sin reconstruir FAISS si venís de Mistral.</p>
+                        </div>
+                        <div class="api-status" id="cohere-status">
+                            <span class="api-status-dot"></span>No configurado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── JINA AI ────────────────────────────────────────────── -->
+                <div class="api-card" style="border-color: rgba(168,85,247,0.3);">
+                    <div class="api-card-header">
+                        <h2>🟣 Jina AI</h2>
+                        <span class="api-badge" style="background:rgba(168,85,247,0.15); color:#a855f7; border-color:rgba(168,85,247,0.3);">Free Tier Disponible</span>
+                    </div>
+                    <div class="api-card-body">
+                        <div class="api-form-group">
+                            <label class="api-label">
+                                <input type="checkbox" id="jina-enabled" class="api-checkbox" onchange="saveConfig()">
+                                <span>Activar Jina AI</span>
+                            </label>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">API Key</label>
+                            <div class="api-input-wrapper">
+                                <input type="password" id="jina-key" class="api-input" placeholder="jina_..." onchange="saveConfig()">
+                                <button class="api-btn-toggle-pwd" onclick="togglePasswordField('jina-key')">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <p class="api-hint">Obtenla en <a href="https://jina.ai/api-key" target="_blank">jina.ai</a> — 1M tokens gratis al registrarte</p>
+                        </div>
+                        <div class="api-info-box">
+                            <p><strong>Uso:</strong> Embeddings multilingüe. <code>jina-embeddings-v3</code> con contexto de 8192 tokens.</p>
+                            <p><strong>Dimensiones:</strong> 1024 — compatible sin reconstruir FAISS si venís de Mistral.</p>
+                        </div>
+                        <div class="api-status" id="jina-status">
+                            <span class="api-status-dot"></span>No configurado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── OLLAMA (LOCAL) ─────────────────────────────────────── -->
+                <div class="api-card" style="border-color: rgba(251,191,36,0.3);">
+                    <div class="api-card-header">
+                        <h2>🖥️ Ollama (Local)</h2>
+                        <span class="api-badge" style="background:rgba(251,191,36,0.15); color:#f59e0b; border-color:rgba(251,191,36,0.3);">Sin API Key · Gratuito</span>
+                    </div>
+                    <div class="api-card-body">
+                        <div class="api-form-group">
+                            <label class="api-label">
+                                <input type="checkbox" id="ollama-enabled" class="api-checkbox" onchange="saveConfig()">
+                                <span>Activar Ollama</span>
+                            </label>
+                        </div>
+                        <div class="api-form-group">
+                            <label class="api-label">Endpoint (URL local de Ollama)</label>
+                            <input type="text" id="ollama-endpoint" class="api-input" placeholder="http://localhost:11434" onchange="saveConfig()">
+                            <p class="api-hint">No necesita API key. Asegurate de tener Ollama corriendo localmente.</p>
+                        </div>
+                        <div class="api-info-box">
+                            <p><strong>Modelos recomendados:</strong></p>
+                            <p><code>mxbai-embed-large</code> — 1024 dims, calidad alta</p>
+                            <p><code>nomic-embed-text</code> — 768 dims, muy rápido</p>
+                            <p style="margin-top:0.5rem; color: #f59e0b; font-size:0.8rem;">⚠️ Si cambiás de Mistral (1024) a nomic (768) necesitás reconstruir FAISS.</p>
+                        </div>
+                        <div class="api-status" id="ollama-status">
+                            <span class="api-status-dot"></span>No configurado
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── BÚSQUEDA EN INTERNET ────────────────────────────────── -->
+            <div style="margin-top: 2rem;">
+                <h3 style="font-size:1rem; font-weight:500; color:var(--text-bright,#f0f0f5); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+                    🌐 Búsqueda en internet
+                </h3>
+                <div class="api-info-alert" style="margin-bottom:1.2rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span>En <strong>Modo Compañero</strong>, el personaje puede buscar información en internet automáticamente cuando lo necesita — sin que vos se lo pidas. Pegá al menos una key y activala.</span>
+                </div>
+                <div class="api-grid">
+
+                    <!-- Activar + explicación -->
+                    <div class="api-card" style="border-color:rgba(99,102,241,0.35); grid-column:1/-1;">
+                        <div class="api-card-header">
+                            <h2>⚙️ Configuración general</h2>
+                            <span class="api-badge" style="background:rgba(99,102,241,0.15); color:#818cf8; border-color:rgba(99,102,241,0.3);">Solo Modo Compañero</span>
+                        </div>
+                        <div class="api-card-body">
+                            <div class="api-form-group">
+                                <label class="api-label">
+                                    <input type="checkbox" id="search-enabled" class="api-checkbox" onchange="saveConfig()">
+                                    <span>Activar búsqueda en internet</span>
+                                </label>
+                                <p class="api-hint">El personaje hace una mini-consulta antes de cada respuesta para decidir si buscar o no. Solo busca ante preguntas factuales (series, música, videojuegos, noticias…), nunca en conversaciones cotidianas o emocionales.</p>
+                            </div>
+                            <div class="api-info-box" style="border-color:rgba(99,102,241,0.25); background:rgba(99,102,241,0.04);">
+                                <p><strong>¿Cómo funciona?</strong></p>
+                                <p style="margin-top:0.4rem;">
+                                    1. Tu mensaje → <code>mistral-small</code> decide si buscar y qué query usar<br>
+                                    2. Si decide buscar → llama al primer proveedor con key configurada<br>
+                                    3. Los resultados se inyectan silenciosamente al contexto<br>
+                                    4. El personaje responde de forma natural, como si ya supiera esa info
+                                </p>
+                                <p style="margin-top:0.5rem; color:#818cf8; font-size:0.8rem;">⚡ El personaje nunca dice "busqué en internet" — integra la info de forma natural.</p>
+                            </div>
+                            <div class="api-info-box" style="margin-top:0.8rem;">
+                                <p><strong>Orden de prioridad:</strong></p>
+                                <p style="margin-top:0.4rem; font-family:monospace; font-size:0.88rem;">
+                                    1. 🔴 SerpAPI &nbsp;→&nbsp; 2. 🦁 Brave Search &nbsp;→&nbsp; 3. 🔵 Tavily
+                                </p>
+                                <p style="margin-top:0.4rem; color:var(--text-soft,#8888a0); font-size:0.8rem;">Podés tener las tres configuradas. Si una falla o se agota, cae automáticamente a la siguiente.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SerpAPI -->
+                    <div class="api-card" style="border-color:rgba(234,88,12,0.3);">
+                        <div class="api-card-header">
+                            <h2>🔴 SerpAPI</h2>
+                            <span class="api-badge" style="background:rgba(234,88,12,0.12); color:#f97316; border-color:rgba(234,88,12,0.3);">100 búsquedas/mes gratis</span>
+                        </div>
+                        <div class="api-card-body">
+                            <div class="api-form-group">
+                                <label class="api-label">API Key</label>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="password" id="search-serpapi-key" class="api-input" placeholder="Pegar key de serpapi.com" onchange="saveConfig()">
+                                    <button class="api-btn-icon" onclick="togglePasswordField('search-serpapi-key')" title="Ver key">👁</button>
+                                </div>
+                            </div>
+                            <div class="api-info-box">
+                                <p><strong>Gratis:</strong> 100 búsquedas/mes · <strong>Pro:</strong> $50/mes</p>
+                                <p style="margin-top:0.3rem;">La más completa: Google, respuestas directas, noticias.</p>
+                                <p style="margin-top:0.3rem;"><a href="https://serpapi.com" target="_blank" style="color:#f97316;">serpapi.com →</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brave -->
+                    <div class="api-card" style="border-color:rgba(249,115,22,0.3);">
+                        <div class="api-card-header">
+                            <h2>🦁 Brave Search</h2>
+                            <span class="api-badge" style="background:rgba(16,185,129,0.12); color:#10b981; border-color:rgba(16,185,129,0.3);">2.000/mes gratis</span>
+                        </div>
+                        <div class="api-card-body">
+                            <div class="api-form-group">
+                                <label class="api-label">API Key</label>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="password" id="search-brave-key" class="api-input" placeholder="Pegar key de brave.com/search/api" onchange="saveConfig()">
+                                    <button class="api-btn-icon" onclick="togglePasswordField('search-brave-key')" title="Ver key">👁</button>
+                                </div>
+                            </div>
+                            <div class="api-info-box">
+                                <p><strong>Gratis:</strong> 2.000/mes · <strong>Pro:</strong> $5 c/1.000</p>
+                                <p style="margin-top:0.3rem;">Independiente de Google, JSON limpio, muy recomendada.</p>
+                                <p style="margin-top:0.3rem;"><a href="https://brave.com/search/api/" target="_blank" style="color:#f97316;">brave.com/search/api →</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tavily -->
+                    <div class="api-card" style="border-color:rgba(14,165,233,0.3);">
+                        <div class="api-card-header">
+                            <h2>🔵 Tavily</h2>
+                            <span class="api-badge" style="background:rgba(14,165,233,0.12); color:#38bdf8; border-color:rgba(14,165,233,0.3);">1.000/mes gratis</span>
+                        </div>
+                        <div class="api-card-body">
+                            <div class="api-form-group">
+                                <label class="api-label">API Key</label>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="password" id="search-tavily-key" class="api-input" placeholder="Pegar key de tavily.com" onchange="saveConfig()">
+                                    <button class="api-btn-icon" onclick="togglePasswordField('search-tavily-key')" title="Ver key">👁</button>
+                                </div>
+                            </div>
+                            <div class="api-info-box">
+                                <p><strong>Gratis:</strong> 1.000/mes · Diseñada para LLMs.</p>
+                                <p style="margin-top:0.3rem;">Resultados ya resumidos, muy fácil de integrar.</p>
+                                <p style="margin-top:0.3rem;"><a href="https://tavily.com" target="_blank" style="color:#38bdf8;">tavily.com →</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- TAB 2: MODELOS POR TAREA                                        -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="api-tab-content" id="tab-modelos">
+            <div class="api-info-alert">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Seleccioná qué modelo usar para cada tarea. El proveedor debe estar habilitado en la pestaña anterior.
+            </div>
+
+            <div class="api-models-grid">
+                
+                <!-- Chat / Respuestas -->
+                <div class="api-model-card">
+                    <h3>💬 Chat Principal</h3>
+                    <p class="api-model-desc">Respuestas del personaje en conversaciones</p>
+                    <select id="model-chat" class="api-select" onchange="saveConfig()">
+                        <optgroup label="── Mistral AI ──">
+                            <option value="mistral-large-latest">Mistral Large (Recomendado)</option>
+                            <option value="mistral-medium-latest">Mistral Medium</option>
+                            <option value="mistral-small-latest">Mistral Small</option>
+                            <option value="open-mistral-nemo">Open Mistral Nemo</option>
+                        </optgroup>
+                        <optgroup label="── OpenRouter (Sin Censura) ──">
+                            <option value="meta-llama/llama-2-70b-chat">Llama 2 70B</option>
+                            <option value="mistralai/mixtral-8x7b-instruct">Mixtral 8x7B</option>
+                            <option value="nousresearch/hermes-3-llama-3.1-405b:nitro">Hermes 3 405B (Sin censura)</option>
+                            <option value="gryphe/mythomax-l2-13b">MythoMax 13B (Sin censura)</option>
+                        </optgroup>
+                    </select>
+                    <p class="api-model-cost">Coste: Medio-Alto | Latencia: 1-3s</p>
+                </div>
+
+                <!-- Embeddings — ahora con todos los proveedores -->
+                <div class="api-model-card" style="border-color: rgba(201,168,76,0.4);">
+                    <h3>🔍 Embeddings (Memoria Vectorial)</h3>
+                    <p class="api-model-desc">Vectorización de la memoria del personaje</p>
+
+                    <div style="margin-bottom: 8px;">
+                        <label class="api-label" style="font-size:0.7rem;">Proveedor de Embeddings</label>
+                        <select id="embedding-provider" class="api-select" onchange="actualizarOpcionesEmbedding(); saveConfig()">
+                            <option value="mistral">Mistral AI</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="cohere">Cohere</option>
+                            <option value="jina">Jina AI</option>
+                            <option value="ollama">Ollama (Local)</option>
+                        </select>
+                    </div>
+
+                    <select id="model-embeddings" class="api-select" onchange="saveConfig()">
+                        <optgroup label="── Mistral AI (1024 dims) ──">
+                            <option value="mistral-embed">mistral-embed · 1024 dims</option>
+                        </optgroup>
+                        <optgroup label="── OpenAI ──">
+                            <option value="text-embedding-3-small">text-embedding-3-small · 1536 dims · Barato</option>
+                            <option value="text-embedding-3-large">text-embedding-3-large · 3072 dims · Premium</option>
+                            <option value="text-embedding-ada-002">text-embedding-ada-002 · 1536 dims · Legacy</option>
+                        </optgroup>
+                        <optgroup label="── Cohere (compatible con Mistral) ──">
+                            <option value="embed-multilingual-v3.0">embed-multilingual-v3.0 · 1024 dims · ⭐ Español</option>
+                            <option value="embed-english-v3.0">embed-english-v3.0 · 1024 dims</option>
+                        </optgroup>
+                        <optgroup label="── Jina AI (compatible con Mistral) ──">
+                            <option value="jina-embeddings-v3">jina-embeddings-v3 · 1024 dims · 8k ctx</option>
+                            <option value="jina-embeddings-v2-base-es">jina-embeddings-v2-base-es · 768 dims · Solo español</option>
+                        </optgroup>
+                        <optgroup label="── Ollama (Local) ──">
+                            <option value="mxbai-embed-large">mxbai-embed-large · 1024 dims · Calidad alta</option>
+                            <option value="nomic-embed-text">nomic-embed-text · 768 dims · Muy rápido</option>
+                            <option value="all-minilm">all-minilm · 384 dims · Ultra liviano</option>
+                        </optgroup>
+                    </select>
+
+                    <div id="embedding-dim-warning" class="api-info-box" style="margin-top:8px; display:none; border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.08);">
+                        <p style="color:#ef4444; font-size:0.8rem;">⚠️ <strong>Dimensiones diferentes a Mistral (1024).</strong> Si ya tenés memoria guardada, necesitás limpiar el índice FAISS antes de cambiar (Configuración → Limpiar Memoria → Limpiar embeddings).</p>
+                    </div>
+
+                    <p class="api-model-cost">Coste: Muy bajo | Latencia: 100-500ms</p>
+                </div>
+
+                <!-- Extracción de hechos -->
+                <div class="api-model-card">
+                    <h3>📝 Extracción de Hechos</h3>
+                    <p class="api-model-desc">Análisis de lo que dice el usuario para guardar memoria</p>
+                    <select id="model-extraction" class="api-select" onchange="saveConfig()">
+                        <optgroup label="── Mistral AI ──">
+                            <option value="mistral-small-latest">Mistral Small (Recomendado)</option>
+                            <option value="mistral-large-latest">Mistral Large</option>
+                        </optgroup>
+                        <optgroup label="── OpenRouter ──">
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Gratis)</option>
+                            <option value="meta-llama/llama-2-7b-chat">Llama 2 7B</option>
+                        </optgroup>
+                    </select>
+                    <p class="api-model-cost">Coste: Bajo | Latencia: 1-2s</p>
+                </div>
+
+                <!-- Síntesis -->
+                <div class="api-model-card">
+                    <h3>✨ Síntesis</h3>
+                    <p class="api-model-desc">Genera resúmenes narrativos de la relación</p>
+                    <select id="model-synthesis" class="api-select" onchange="saveConfig()">
+                        <optgroup label="── Mistral AI ──">
+                            <option value="mistral-small-latest">Mistral Small (Recomendado)</option>
+                            <option value="mistral-large-latest">Mistral Large</option>
+                        </optgroup>
+                        <optgroup label="── OpenRouter ──">
+                            <option value="mistralai/mixtral-8x7b-instruct">Mixtral 8x7B</option>
+                            <option value="nousresearch/hermes-3-llama-3.1-405b:nitro">Hermes 3 405B</option>
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Gratis)</option>
+                        </optgroup>
+                    </select>
+                    <p class="api-model-cost">Coste: Medio | Latencia: 2-4s</p>
+                </div>
+
+                <!-- Generación de Contenido -->
+                <div class="api-model-card">
+                    <h3>🎨 Generación de Contenido</h3>
+                    <p class="api-model-desc">Escenarios, eventos, objetos con IA</p>
+                    <select id="model-generation" class="api-select" onchange="saveConfig()">
+                        <optgroup label="── Mistral AI ──">
+                            <option value="mistral-small-latest">Mistral Small (Recomendado)</option>
+                            <option value="mistral-large-latest">Mistral Large</option>
+                        </optgroup>
+                        <optgroup label="── OpenRouter ──">
+                            <option value="mistralai/mixtral-8x7b-instruct">Mixtral 8x7B</option>
+                            <option value="nousresearch/hermes-3-llama-3.1-405b:nitro">Hermes 3 405B</option>
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Gratis)</option>
+                        </optgroup>
+                    </select>
+                    <p class="api-model-cost">Coste: Medio | Latencia: 2-4s</p>
+                </div>
+
+                <!-- Enriquecimiento Episódico -->
+                <div class="api-model-card">
+                    <h3>📚 Enriquecimiento Episódico</h3>
+                    <p class="api-model-desc">Análisis profundo de episodios de chat</p>
+                    <select id="model-enrichment" class="api-select" onchange="saveConfig()">
+                        <optgroup label="── Mistral AI ──">
+                            <option value="mistral-medium-latest">Mistral Medium (Recomendado)</option>
+                            <option value="mistral-small-latest">Mistral Small</option>
+                        </optgroup>
+                        <optgroup label="── OpenRouter ──">
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Gratis)</option>
+                            <option value="meta-llama/llama-2-7b-chat">Llama 2 7B</option>
+                        </optgroup>
+                    </select>
+                    <p class="api-model-cost">Coste: Bajo-Medio | Latencia: 1-2s</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- TAB 3: SEGURIDAD & FALLBACKS                                    -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="api-tab-content" id="tab-seguridad">
+            
+            <!-- Sistema de Detección NSFW -->
+            <div class="api-section">
+                <h2>🔍 Sistema de Detección NSFW</h2>
+                <p class="api-section-desc">Detecta contenido adulto en respuestas de Mistral y automáticamente usa OpenRouter</p>
+
+                <div class="api-config-box">
+                    <div class="api-option">
+                        <label class="api-label">
+                            <input type="checkbox" id="nsfw-detection-enabled" class="api-checkbox" onchange="saveConfig()">
+                            <span><strong>Activar Detección NSFW</strong></span>
+                        </label>
+                        <p class="api-hint">Si está activado, monitorea respuestas de Mistral y cambia a OpenRouter si detecta contenido adulto</p>
+                    </div>
+
+                    <div class="api-form-group">
+                        <label class="api-label">Sensibilidad de Detección</label>
+                        <div class="api-sensitivity-slider">
+                            <input type="range" id="nsfw-sensitivity" min="1" max="5" value="3" class="api-slider" onchange="updateSensitivityLabel(this)">
+                            <div class="api-sensitivity-labels">
+                                <span>Baja</span>
+                                <span>Media</span>
+                                <span>Alta</span>
+                            </div>
+                        </div>
+                        <p class="api-hint" id="sensitivity-hint">Sensibilidad media: Detecta referencias explícitas claras</p>
+                    </div>
+
+                    <div class="api-option">
+                        <label class="api-label">
+                            <input type="checkbox" id="nsfw-auto-switch" class="api-checkbox" checked onchange="saveConfig()">
+                            <span><strong>Cambio Automático</strong></span>
+                        </label>
+                        <p class="api-hint">Si está activado, automáticamente cambia a OpenRouter sin advertencia.</p>
+                    </div>
+
+                    <div class="api-option">
+                        <label class="api-label">
+                            <input type="checkbox" id="nsfw-logging" class="api-checkbox" checked onchange="saveConfig()">
+                            <span><strong>Registrar Cambios</strong></span>
+                        </label>
+                        <p class="api-hint">Guarda en logs cuándo y por qué cambia de modelo</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fallbacks -->
+            <div class="api-section">
+                <h2>⚡ Sistema de Fallbacks</h2>
+                <p class="api-section-desc">Qué hacer cuando un proveedor no está disponible</p>
+
+                <div class="api-config-box">
+                    <div class="api-option">
+                        <label class="api-label">
+                            <input type="checkbox" id="fallback-enabled" class="api-checkbox" checked onchange="saveConfig()">
+                            <span><strong>Activar Fallbacks Automáticos</strong></span>
+                        </label>
+                    </div>
+
+                    <div class="api-fallback-chain">
+                        <h3>Orden de Intento</h3>
+                        <div class="api-chain-item">
+                            <div class="api-chain-number">1</div>
+                            <div class="api-chain-content">
+                                <p class="api-chain-label">Proveedor Principal</p>
+                                <select id="fallback-primary" class="api-select" onchange="saveConfig()">
+                                    <option value="mistral">Mistral AI</option>
+                                    <option value="openrouter">OpenRouter</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="api-chain-arrow">↓</div>
+
+                        <div class="api-chain-item">
+                            <div class="api-chain-number">2</div>
+                            <div class="api-chain-content">
+                                <p class="api-chain-label">Proveedor Fallback</p>
+                                <select id="fallback-secondary" class="api-select" onchange="saveConfig()">
+                                    <option value="openrouter">OpenRouter</option>
+                                    <option value="mistral">Mistral AI</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="api-chain-arrow">↓</div>
+
+                        <div class="api-chain-item api-chain-error">
+                            <div class="api-chain-number">✗</div>
+                            <div class="api-chain-content">
+                                <p class="api-chain-label">Error - No hay fallback disponible</p>
+                                <p class="api-hint">El usuario verá un mensaje de error</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="api-option">
+                        <label class="api-label">
+                            <input type="checkbox" id="retry-count" class="api-checkbox" checked onchange="saveConfig()">
+                            <span><strong>Reintentos Automáticos</strong></span>
+                        </label>
+                        <div style="margin-top: 10px;">
+                            <label class="api-label">Cantidad de reintentos</label>
+                            <input type="number" id="retry-attempts" class="api-input" min="1" max="5" value="3" onchange="saveConfig()">
+                        </div>
+                        <p class="api-hint">Cuántos intentos antes de pasar al fallback</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rate Limiting -->
+            <div class="api-section">
+                <h2>⏱️ Rate Limiting</h2>
+                <p class="api-section-desc">Controla la velocidad de llamadas a APIs para evitar límites</p>
+
+                <div class="api-config-box">
+                    <div class="api-form-group">
+                        <label class="api-label">Máximo de llamadas por minuto (Mistral)</label>
+                        <input type="number" id="mistral-rpm-limit" class="api-input" min="1" max="120" value="30" onchange="saveConfig()">
+                        <p class="api-hint">Recomendado: 30 para cuentas estándar, 120 para profesionales</p>
+                    </div>
+
+                    <div class="api-form-group">
+                        <label class="api-label">Máximo de llamadas por minuto (OpenRouter)</label>
+                        <input type="number" id="openrouter-rpm-limit" class="api-input" min="1" max="200" value="60" onchange="saveConfig()">
+                        <p class="api-hint">OpenRouter generalmente permite más llamadas</p>
+                    </div>
+
+                    <div class="api-option">
+                        <label class="api-label">
+                            <input type="checkbox" id="queue-enabled" class="api-checkbox" checked onchange="saveConfig()">
+                            <span><strong>Encolar Solicitudes</strong></span>
+                        </label>
+                        <p class="api-hint">Si hay más solicitudes que el límite, las encola en lugar de rechazarlas</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 4: MI LIBRERÍA DE MODELOS -->
+        <div class="api-tab-content" id="tab-libreria">
+            <div style="padding: 2rem;">
+                <h2>📚 Mi Librería de Modelos Personalizados</h2>
+                <p style="color: #666; margin-bottom: 2rem;">Agrega tus propios modelos, gestiona tu librería personal y asígnalos a tareas específicas.</p>
+
+                <!-- SECCIÓN 1: AGREGAR MODELO -->
+                <div class="libreria-card">
+                    <h3>➕ Agregar Nuevo Modelo</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="position: relative;">
+                            <input type="text" id="lib-modelo-id"
+                                placeholder="ID del modelo (ej: voxtral-small-2507  ·  ej: nousresearch/hermes-3-llama-3.1-405b)"
+                                class="api-input" style="width: 100%; padding-right: 8rem; box-sizing: border-box;"
+                                oninput="detectarProveedorAuto()"
+                                onkeydown="if(event.key==='Enter') agregarModeloLibreria()"
+                                autocomplete="off" autocorrect="off" spellcheck="false">
+                            <span id="lib-proveedor-badge" style="
+                                display: none;
+                                position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                                background: rgba(201,168,76,0.15); color: #c9a84c;
+                                border: 1px solid rgba(201,168,76,0.3);
+                                border-radius: 4px; padding: 2px 8px; font-size: 0.72rem;
+                                pointer-events: none; white-space: nowrap;
+                            "></span>
+                        </div>
+                        <input type="text" id="lib-modelo-nombre" placeholder="Nombre amigable (opcional)" class="api-input" style="width: 100%;">
+                        <textarea id="lib-modelo-descripcion" placeholder="Descripción corta" class="api-input" style="width: 100%; min-height: 80px;"></textarea>
+                        <div style="display: flex; gap: 1rem;">
+                            <select id="lib-modelo-proveedor" class="api-input" style="flex: 1;">
+                                <option value="auto">🔍 Auto-detectar</option>
+                                <option value="openrouter">🌐 OpenRouter</option>
+                                <option value="mistral">🟠 Mistral</option>
+                                <option value="openai">🟢 OpenAI</option>
+                                <option value="cohere">🔵 Cohere</option>
+                                <option value="jina">🟣 Jina AI</option>
+                                <option value="ollama">🖥️ Ollama (Local)</option>
+                                <option value="otro">❓ Otro</option>
+                            </select>
+                            <input type="text" id="lib-modelo-tags" placeholder="Tags (separados por comas)" class="api-input" style="flex: 1;">
+                        </div>
+                        <button onclick="agregarModeloLibreria()" class="api-btn api-btn-primary" style="width: 100%;">
+                            ✨ Agregar a Librería
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: MIS MODELOS -->
+                <div class="libreria-card" style="margin-top: 2rem;">
+                    <h3>📋 Mis Modelos Guardados</h3>
+                    <div id="libreria-modelos-lista" style="margin-top: 1rem;">
+                        <p class="cargando">⏳ Cargando modelos...</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER CON BOTONES DE ACCIÓN -->
+    <div class="acciones-finales">
+        <button class="btn-final btn-exportar" onclick="exportConfig()">
+            📥 Exportar
+        </button>
+        <button class="btn-final btn-guardar" onclick="saveAndClose()">
+            💾 Guardar Cambios
+        </button>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="api-toast" class="api-toast"></div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="api-loading" class="api-loading">
+        <div class="api-spinner"></div>
+        <p>Guardando configuración...</p>
+    </div>
+
+<div id="modelo-custom-resultado" class="modelo-custom-resultado"></div>
+    <script src="/static/script_api_manager.js"></script>
+</body>
+</html>

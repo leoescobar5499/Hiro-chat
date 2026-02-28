@@ -1,0 +1,7 @@
+flask>=3.0.0
+mistralai>=1.0.0
+python-dotenv>=1.0.0
+numpy>=1.26.0
+faiss-cpu>=1.7.4
+msgpack>=1.0.7
+werkzeug>=3.0.0

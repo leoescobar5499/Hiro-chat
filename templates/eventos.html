@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0c0c0f">
+    <title>Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    
+    <style>
+        /* Definición de la paleta de colores oscura y tipografías */
+        :root {
+            --bg-primary: #0c0c0f;
+            --bg-secondary: #1a1a20;
+            --bg-tertiary: #25252c;
+            --border: #2e2e38;
+            --border-hover: #4a4a5a;
+            --text-primary: #f2f2f5;
+            --text-secondary: #9ba1a6;
+            --accent: #d4af37; /* Tono dorado elegante */
+            --accent-dim: rgba(212, 175, 55, 0.1);
+            --danger: #ef4444;
+            --font-main: 'Crimson Pro', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        /* -------------------------------------------
+           SCROLL GLOBAL DE LA PÁGINA
+           ------------------------------------------- */
+        html, body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            /* Forzamos el scroll natural para que no se bloquee por otros CSS */
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto !important; 
+            scroll-behavior: smooth;
+        }
+
+        /* Estilo personalizado para el scrollbar global */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Contenedor principal adaptable */
+        .page-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 60px 24px 40px;
+        }
+
+        /* Cabecera */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+            transform: translateX(-2px);
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin: 0 0 32px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* Títulos de sección */
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* -------------------------------------------
+           LISTA DE EVENTOS (Scroll Natural)
+           ------------------------------------------- */
+        #listaEventos {
+            /* Eliminamos la altura fija para que la página crezca de manera natural */
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* Tarjetas de eventos */
+        .card-evento {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-evento:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-evento.disparado {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-dim);
+        }
+
+        .card-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .card-historia {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--border);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* Separador */
+        .divider {
+            border: none;
+            height: 1px;
+            background: var(--border);
+            margin: 32px 0;
+        }
+
+        /* Formularios e Inputs */
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+            transition: all 0.2s ease;
+        }
+
+        .form-input::placeholder {
+            color: #555566;
+        }
+
+        .form-input:focus { 
+            border-color: var(--accent); 
+            background: var(--bg-tertiary);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Contenedores de botones del formulario */
+        .form-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        /* Botones Principales */
+        .btn-ia, .btn-guardar {
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-ia {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            flex: 1;
+        }
+
+        .btn-ia:hover:not(:disabled) {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-ia:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+
+        .btn-guardar {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: 1px solid var(--accent);
+            flex: 1;
+        }
+
+        .btn-guardar:hover {
+            background: #e6c555;
+            transform: translateY(-1px);
+        }
+
+        /* Botones de las tarjetas (Inyectados por JS) */
+        .btn-activar, .btn-reset {
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .btn-activar {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-activar:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-reset:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        .btn-delete {
+            background: var(--bg-tertiary);
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete:hover { 
+            color: var(--danger); 
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Badges */
+        .badge-tipo {
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.3);
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .badge-activo {
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-weight: 600;
+            background: var(--accent-dim);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .badge-aviso {
+            font-size: 0.7rem;
+            color: #f59e0b;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            background: rgba(245, 158, 11, 0.12);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .badge-seguimiento {
+            font-size: 0.7rem;
+            color: #60a5fa;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            background: rgba(96, 165, 250, 0.1);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* -------------------------------------------
+           RESPONSIVE DESIGN (Para Celulares)
+           ------------------------------------------- */
+        @media (max-width: 500px) {
+            .page-container {
+                padding: 40px 16px 30px;
+            }
+            
+            .card-inner {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .card-inner > div:last-child {
+                width: 100%;
+                justify-content: flex-start;
+                padding-top: 8px;
+                border-top: 1px solid var(--border);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-ia, .btn-guardar {
+                width: 100%;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-row > * {
+                width: 100% !important;
+                margin-bottom: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+
+        <div class="page-header">
+            <a href="/" class="back-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Volver
+            </a>
+            <h1 class="page-title">Eventos</h1>
+        </div>
+
+        <p class="page-subtitle">
+            Los eventos hacen que el personaje recuerde momentos especiales con toda su historia y emoción. Podés activarlos manualmente o configurarlos para que se disparen solos.
+        </p>
+
+        <!-- Lista de eventos (Ahora crece hacia abajo y la página entera hace scroll) -->
+        <div class="section-label">Mis eventos</div>
+        <div id="listaEventos"></div>
+
+        <!-- Formulario nuevo evento -->
+        <hr class="divider">
+        <div class="section-label">Nuevo evento</div>
+
+        <input type="text" id="nuevo-evento-nombre" class="form-input"
+            placeholder="Nombre (ej: El día que nos conocimos)">
+            
+        <textarea id="nuevo-evento-desc" class="form-input" rows="2"
+            placeholder="Tu idea o descripción del evento..."></textarea>
+            
+        <textarea id="nuevo-evento-historia" class="form-input" rows="3"
+            placeholder="Historia completa del momento (qué pasó, cómo se sintieron, qué lo hace especial)..."></textarea>
+
+        <div class="form-row">
+            <select id="nuevo-evento-tipo" class="form-input" style="flex: 2;" onchange="actualizarCampoEvento()">
+                <option value="manual">Manual (vos lo activás)</option>
+                <option value="fecha">Fecha exacta</option>
+                <option value="mensajes">Cantidad de mensajes</option>
+            </select>
+            
+            <input type="text" id="nuevo-evento-valor" class="form-input" style="flex: 1; display: none;" placeholder="">
+        </div>
+
+        <!-- ── Campos avanzados de tiempo ── -->
+        <div class="form-row">
+            <div style="flex:1">
+                <label style="font-size:0.78rem; color:var(--text-secondary); font-family:var(--font-mono); display:block; margin-bottom:4px; letter-spacing:0.06em; text-transform:uppercase;">Hora del evento</label>
+                <input type="time" id="nuevo-evento-hora" class="form-input" style="margin-bottom:0"
+                    placeholder="HH:MM (opcional)">
+            </div>
+            <div style="flex:1">
+                <label style="font-size:0.78rem; color:var(--text-secondary); font-family:var(--font-mono); display:block; margin-bottom:4px; letter-spacing:0.06em; text-transform:uppercase;">Avisar antes</label>
+                <select id="nuevo-evento-aviso" class="form-input" style="margin-bottom:0">
+                    <option value="0">Sin aviso previo</option>
+                    <option value="1">1 día antes</option>
+                    <option value="2">2 días antes</option>
+                    <option value="3">3 días antes</option>
+                    <option value="7">1 semana antes</option>
+                </select>
+            </div>
+        </div>
+
+        <textarea id="nuevo-evento-seguimiento" class="form-input" rows="2" style="margin-top:12px"
+            placeholder="Pregunta de seguimiento post-evento (ej: ¿Cómo te fue en el examen?) — Opcional"></textarea>
+
+        <div class="action-buttons">
+            <button id="btn-generar-evento" class="btn-ia" onclick="generarEventoIA()">
+                ✨ Generar con IA
+            </button>
+            <button class="btn-guardar" onclick="crearEvento()">
+                + Guardar evento
+            </button>
+        </div>
+
+    </div>
+
+    <script src="/static/script_eventos.js"></script>
+</body>
+</html>

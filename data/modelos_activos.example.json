@@ -1,0 +1,7 @@
+{
+  "openrouter_chat": "meta-llama/llama-3.1-8b-instruct:free",
+  "openrouter_small": "meta-llama/llama-3.1-8b-instruct:free",
+  "mistral_chat": "mistral-large-latest",
+  "mistral_small": "mistral-small-latest",
+  "provider": "mistral"
+}
