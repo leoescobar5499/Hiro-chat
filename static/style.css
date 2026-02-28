@@ -2604,5 +2604,76 @@ mark {
 @media (min-width: 600px) {
     .expresion-panel { width: 240px; }
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE FIX
+   ═══════════════════════════════════════════════════════════════════════════ */
 
+@media (max-width: 768px) {
+
+    html, body {
+        height: auto !important;
+        min-height: 100vh;
+        overflow: auto !important;
+        display: block !important;
+    }
+
+    .header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 500;
+    }
+
+    .expresion-widget {
+        position: fixed !important;
+        top: 57px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 499;
+    }
+
+    .chat-container {
+        overflow-y: visible !important;
+        height: auto !important;
+        padding-top: 90px !important;
+        padding-bottom: 130px !important;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .input-area {
+        padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    }
+
+    .message-input { font-size: 16px !important; }
+
+    .settings-toggle {
+        top: 12px !important;
+        right: 12px !important;
+    }
+
+    .settings-dropdown {
+        top: 60px !important;
+        right: 12px !important;
+    }
+
+    .header-content { padding-right: 48px !important; }
+
+    .expresion-panel     { max-height: 200px !important; width: min(220px, 82vw) !important; }
+    .expresion-panel img { max-height: 155px !important; }
+
+    .sidebar { width: 100% !important; }
+}
+
+@media (max-width: 480px) {
+    .header-escenario-slot { display: none !important; }
+
+    .hiro-name {
+        max-width: calc(100vw - 115px) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
 /* fin */
