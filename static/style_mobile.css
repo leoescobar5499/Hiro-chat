@@ -1,0 +1,91 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE FIX — Agregar al FINAL de style.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+    /* ── Dejar que el body scrollee como en escenarios ─────────────────────
+       En lugar de pelear con 100vh, dejamos scroll natural
+       y fijamos header e input en sus lugares */
+    html, body {
+        height: auto !important;
+        min-height: 100vh;
+        overflow: auto !important;
+    }
+
+    /* Header fijo arriba — igual que el input-area ya es fijo abajo */
+    .header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 500;
+    }
+
+    /* Widget de expresión fijo justo debajo del header */
+    .expresion-widget {
+        position: fixed !important;
+        top: 57px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 499;
+    }
+
+    /* Chat: scroll natural, con espacio arriba (header) y abajo (input) */
+    .chat-container {
+        overflow-y: visible !important;
+        height: auto !important;
+        padding-top: 90px !important;    /* header ~57px + widget ~25px + aire */
+        padding-bottom: 130px !important; /* input area + margen generoso */
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    /* El body flex no aplica en mobile scroll natural */
+    body {
+        display: block !important;
+    }
+
+    /* Input ya es fixed — solo ajustamos el safe area para iPhone */
+    .input-area {
+        padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    }
+
+    /* Evitar zoom al escribir en iOS */
+    .message-input { font-size: 16px !important; }
+
+    /* Botón 3 puntos alineado con el header fijo */
+    .settings-toggle {
+        top: 12px !important;
+        right: 12px !important;
+    }
+
+    .settings-dropdown {
+        top: 60px !important;
+        right: 12px !important;
+    }
+
+    /* Espacio para que el nombre no choque con el botón */
+    .header-content { padding-right: 48px !important; }
+
+    /* Panel de expresión más chico */
+    .expresion-panel     { max-height: 200px !important; width: min(220px, 82vw) !important; }
+    .expresion-panel img { max-height: 155px !important; }
+
+    /* Sidebar cubre toda la pantalla */
+    .sidebar { width: 100% !important; }
+}
+
+@media (max-width: 480px) {
+
+    /* Escenario en header ocupa demasiado espacio — lo ocultamos */
+    .header-escenario-slot { display: none !important; }
+
+    /* Nombre del personaje no choca con el botón */
+    .hiro-name {
+        max-width: calc(100vw - 115px) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
