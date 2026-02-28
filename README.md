@@ -1,64 +1,74 @@
-🤖 Hiro Chat
-Compañero virtual de roleplay con memoria persistente, multimodelo y multipersonaje.
-Hiro Chat es una aplicación web local construida con Flask que te permite chatear con personajes de IA que realmente te recuerdan. No es solo un chatbot — tiene un sistema de memoria episódica, extracción de hechos, síntesis de conocimiento, embeddings semánticos con FAISS, evolución de relación a lo largo del tiempo, expresiones faciales, escenarios, eventos, diarios automáticos y soporte para múltiples proveedores de IA (Mistral, OpenRouter, OpenAI, Cohere, Jina, Ollama).
-✨ Features principales
+# Hiro Chat
 
-🧠 Memoria real — aprende sobre vos, genera síntesis, recuerda entre sesiones
-👥 Multipersonaje — cada personaje tiene su propia DB, embeddings y config de API
-🌐 Multimodelo — cambiá de proveedor o modelo sin tocar código
-🎭 Sistema de expresiones — imágenes que cambian según la respuesta del personaje
-📖 Diarios automáticos — el personaje escribe sobre lo que vivieron juntos
-🌱 Evolución de fases — la relación y la personalidad cambian con el tiempo
-⚡ Eventos y escenarios — narrativa dinámica con disparadores automáticos
+**Compañero virtual con memoria real.** Una app web local que te permite chatear con personajes de IA que aprenden sobre vos, evolucionan con el tiempo y recuerdan todo entre sesiones.
 
-🛠️ Cómo nació este proyecto
-Este proyecto fue una colaboración humano-IA bastante inusual. La arquitectura, la lógica del backend, el sistema de memoria y la mayor parte del código fueron desarrollados en conversación con Claude (Anthropic) y Gemini (Google) — que actuaron como programadores principales. Gemini aportó mucho en la interfaz visual de las páginas; Claude en la programación, la arquitectura y la lógica del sistema de memoria. El humano detrás del proyecto aportó la visión, las ideas, las decisiones de diseño y todo lo que ninguna IA podía hacer sola.
-Una demostración práctica de cómo se puede construir algo complejo colaborando con modelos de lenguaje desde cero.
+> Construida con Flask, FAISS, SQLite y soporte para múltiples proveedores de IA.
 
-📋 Licencia
-Uso personal y no comercial. Ver LICENSE para más detalle.
+---
 
-# Carpeta `data/`
+## ¿Qué hace?
 
-Esta carpeta contiene los datos de configuración y personajes. **No se sube al repo** (ver `.gitignore`), excepto los archivos de ejemplo y el personaje por defecto.
+No es un chatbot genérico. Cada personaje tiene su propia base de datos, índice vectorial y configuración. La relación evoluciona a lo largo del tiempo: el personaje aprende quién sos, recuerda lo que hablaron, y cambia con el tiempo.
 
-## Primeros pasos
+**Sistema de memoria**
+- Extracción automática de hechos desde la conversación
+- Memoria episódica con búsqueda semántica (FAISS + embeddings)
+- Síntesis periódica del conocimiento acumulado
+- Perfil narrativo del usuario que se actualiza solo
 
-Antes de iniciar la app por primera vez, copiá los archivos `.example` a sus nombres reales:
+**Personajes y relación**
+- Multipersonaje — cada uno con su propia DB, embeddings y config
+- Evolución por fases — la dinámica cambia a medida que la relación crece
+- Expresiones faciales que responden al contenido del mensaje
+- Diarios automáticos escritos desde la perspectiva del personaje
+- Escenarios y eventos con disparadores narrativos
+
+**Técnico**
+- Multimodelo y multiproveedores — Mistral, OpenRouter, OpenAI, Cohere, Jina, Ollama
+- Cambiás de modelo o proveedor desde la UI sin tocar código
+- Todo corre local — tus datos no salen de tu máquina
+
+---
+
+## Instalación
+
+Requiere Python 3.10+ en Linux.
 
 ```bash
-cp data/api_config.example.json data/api_config.json
-cp data/libreria_modelos.example.json data/libreria_modelos.json
-cp data/modelos_activos.example.json data/modelos_activos.json
-cp data/personaje_activo.example.json data/personaje_activo.json
+git clone https://github.com/leoescobar5499/hiro-chat.git
+cd hiro-chat
+bash install.sh
+bash run_app.sh
 ```
 
-Luego abrí la app en **http://localhost:5000** y configurá tus API keys desde el **⚙️ Gestor de APIs**.
+Abrí **http://localhost:5000** y configurá tu API key desde **⚙️ Gestor de APIs**.
 
-## Estructura
+Necesitás al menos una API key para que el chat funcione. Las opciones gratuitas para empezar:
+- [Mistral](https://console.mistral.ai/api-keys/) — recomendado, tiene tier gratuito
+- [OpenRouter](https://openrouter.ai/keys) — cientos de modelos, muchos gratuitos
 
-```
-data/
-├── api_config.json          ← Tu configuración de APIs (keys, modelos). NO se sube.
-├── libreria_modelos.json    ← Biblioteca de modelos que agregaste. NO se sube.
-├── modelos_activos.json     ← Modelo activo por proveedor. NO se sube.
-├── personaje_activo.json    ← Qué personaje está activo ahora. NO se sube.
-│
-└── personajes/
-    └── hiro/                ← Personaje por defecto incluido en el repo
-        ├── personaje.json   ← Ficha del personaje (se sube — es el demo)
-        ├── expresiones.json ← Expresiones faciales del personaje (se sube)
-        ├── memoria.db       ← Base de datos de memoria. NO se sube.
-        ├── embeddings.index ← Índice vectorial FAISS. NO se sube.
-        └── avatar.*         ← Imagen del personaje. NO se sube.
-```
+---
 
-## Proveedores de API compatibles
+## Configuración de APIs
 
-| Proveedor | Uso | Link |
-|-----------|-----|------|
-| **Mistral** | Chat + embeddings (recomendado para empezar) | [console.mistral.ai](https://console.mistral.ai/api-keys/) |
-| **OpenRouter** | Chat con cientos de modelos, muchos gratuitos | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| Proveedor | Para qué | Link |
+|-----------|----------|------|
+| **Mistral** | Chat + embeddings | [console.mistral.ai](https://console.mistral.ai/api-keys/) |
+| **OpenRouter** | Chat con muchos modelos | [openrouter.ai/keys](https://openrouter.ai/keys) |
 | OpenAI | Chat + embeddings | [platform.openai.com](https://platform.openai.com/api-keys) |
 | Cohere | Embeddings en español | [dashboard.cohere.com](https://dashboard.cohere.com/api-keys) |
-| Ollama | Modelos locales sin API key | [ollama.ai](https://ollama.ai) |
+| Ollama | Modelos locales, sin key | [ollama.ai](https://ollama.ai) |
+
+---
+
+## Cómo nació este proyecto
+
+Una colaboración bastante inusual entre un humano y dos IAs. La arquitectura, el backend y el sistema de memoria se desarrollaron en conversación con Claude (Anthropic) — que actuó como programador principal. Gemini (Google) aportó en la interfaz visual. El humano detrás del proyecto aportó la visión, las decisiones de diseño y todo lo que ninguna IA podía hacer sola.
+
+Una demostración práctica de lo que se puede construir colaborando con modelos de lenguaje desde cero.
+
+---
+
+## Licencia
+
+Uso personal y no comercial. Ver [LICENSE](LICENSE.md) para más detalle.
