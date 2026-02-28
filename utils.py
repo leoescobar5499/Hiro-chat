@@ -300,6 +300,10 @@ def _resolver_modelo_para_llamada(model, provider, config):
         # Para Mistral queremos un nombre sin '/'
         if configured and '/' not in configured:
             return configured
+        # Si el modelo configurado tiene '/' es de OpenRouter — lo devolvemos tal
+        # cual para que llamada_mistral_segura detecte el mismatch y redirija.
+        if configured and '/' in configured:
+            return configured
         return model  # fallback al original
 
     else:  # openrouter
@@ -318,8 +322,31 @@ def _resolver_modelo_para_llamada(model, provider, config):
             return 'nousresearch/hermes-3-llama-3.1-405b:nitro'
 
 
+def _inferir_tarea(model, config):
+    """Devuelve el nombre de la tarea que usa este modelo según el config."""
+    nombres = {
+        'chat':       'chat',
+        'extraction': 'extracción',
+        'synthesis':  'síntesis',
+        'generation': 'generación',
+        'enrichment': 'enriquecimiento',
+        'embeddings': 'embeddings',
+    }
+    models_cfg = config.get('models', {})
+    for clave, label in nombres.items():
+        if models_cfg.get(clave) == model:
+            return label
+    # Fallback: inferir por nombre
+    if 'embed' in model:
+        return 'embeddings'
+    if 'small' in model or '8b' in model or '3b' in model:
+        return 'extracción'
+    return 'chat'
+
+
 def _llamar_mistral(model, messages, max_tokens, config, detect_nsfw=True, temperature=None):
     """Llamada con la SDK nueva de Mistral (v1+). Nunca usa el .env directamente."""
+    print(f"🔵 [Mistral] {model} → {_inferir_tarea(model, config)}")
     api_key = (config.get('mistral', {}).get('apiKey') or '').strip()
     if not api_key:
         api_key = os.getenv('MISTRAL_API_KEY', '').strip()
@@ -354,6 +381,7 @@ def _llamar_mistral(model, messages, max_tokens, config, detect_nsfw=True, tempe
 def _llamar_openrouter(model, messages, max_tokens, config, temperature=None):
     """Llamada a OpenRouter vía requests. Devuelve objeto compatible con Mistral response."""
     import requests as _req
+    print(f"🟠 [OpenRouter] {model} → {_inferir_tarea(model, config)}")
 
     api_key = (config.get('openrouter', {}).get('apiKey') or '').strip()
     if not api_key:
@@ -367,6 +395,11 @@ def _llamar_openrouter(model, messages, max_tokens, config, temperature=None):
     payload = {"model": model, "messages": messages, "max_tokens": max_tokens}
     if temperature is not None:
         payload['temperature'] = temperature
+    # Desactivar reasoning en modelos que lo soportan (DeepSeek, aion, etc.)
+    # Así el contenido siempre llega en el campo "content" estándar.
+    MODELOS_REASONING = ('deepseek', 'aion-labs', 'qwen')
+    if any(m in model for m in MODELOS_REASONING):
+        payload['reasoning'] = {'enabled': False}
     resp = _req.post(
         "https://openrouter.ai/api/v1/chat/completions",
         headers={
@@ -381,7 +414,29 @@ def _llamar_openrouter(model, messages, max_tokens, config, temperature=None):
     if resp.status_code != 200:
         raise Exception(f"OpenRouter error {resp.status_code}: {resp.text[:300]}")
 
-    content = resp.json()['choices'][0]['message']['content']
+    data    = resp.json()
+    message = data['choices'][0]['message']
+    raw     = message.get('content')
+
+    # Formato 1: string normal (mayoría de modelos)
+    if isinstance(raw, str):
+        content = raw
+    # Formato 2: lista de bloques tipo Anthropic [{'type':'text','text':'...'}]
+    elif isinstance(raw, list):
+        partes = [b.get('text') or b.get('content','') for b in raw
+                  if isinstance(b, dict) and b.get('type') != 'thinking']
+        if not partes:
+            partes = [b.get('thinking') or b.get('text','') for b in raw if isinstance(b, dict)]
+        content = ' '.join(p for p in partes if p)
+    else:
+        content = ''
+
+    # IMPORTANTE: reasoning_details y reasoning son el pensamiento INTERNO del modelo.
+    # Nunca se muestran al usuario. Si content está vacío, el modelo no generó
+    # respuesta visible — se registra en el log para debug.
+    if not content.strip():
+        print(f'⚠️ OpenRouter: content vacío para modelo {model}. Keys en message: {list(message.keys())}')
+        content = '...'
 
     # Objeto mínimo compatible con el formato de respuesta de Mistral
     class _Resp:
@@ -404,6 +459,10 @@ def llamada_mistral_segura(model, messages, max_tokens=600, detect_nsfw=True, te
 
     'model' puede ser un nombre Mistral ('mistral-large-latest') usado como
     indicador de tarea, o directamente un ID de OpenRouter ('gryphe/mythomax-l2-13b').
+
+    IMPORTANTE: si el modelo configurado (models.chat/extraction) tiene '/' en su ID,
+    se fuerza OpenRouter independientemente de cuál sea el primaryProvider. Esto evita
+    que modelos de OpenRouter se envíen por error a la API de Mistral.
     """
     config   = cargar_config_apis()
     provider = obtener_proveedor_actual()
@@ -412,6 +471,31 @@ def llamada_mistral_segura(model, messages, max_tokens=600, detect_nsfw=True, te
     max_retries   = config.get('fallback', {}).get('retryAttempts', 3) if retry_enabled else 1
 
     real_model = _resolver_modelo_para_llamada(model, provider, config)
+
+    # ── Auto-detección del proveedor real según el ID del modelo ────────────
+    # Regla simple: si tiene '/' es de OpenRouter, si no es de Mistral.
+    # Esto evita que modelos de un proveedor se manden al otro por error.
+    if '/' in real_model and provider == 'mistral':
+        # Modelo de OpenRouter mandado a Mistral → redirigir a OpenRouter
+        or_cfg = config.get('openrouter', {})
+        if or_cfg.get('apiKey', '').strip():
+            print(f"🔀 '{real_model}' es de OpenRouter — redirigiendo a OpenRouter")
+            provider = 'openrouter'
+        else:
+            raise ValueError(
+                f"El modelo '{real_model}' requiere OpenRouter pero no hay API key configurada."
+            )
+    elif '/' not in real_model and provider == 'openrouter':
+        # Modelo de Mistral mandado a OpenRouter → redirigir a Mistral
+        mi_cfg = config.get('mistral', {})
+        if mi_cfg.get('apiKey', '').strip() or os.getenv('MISTRAL_API_KEY', '').strip():
+            print(f"🔀 '{real_model}' es de Mistral — redirigiendo a Mistral")
+            provider = 'mistral'
+        else:
+            raise ValueError(
+                f"El modelo '{real_model}' requiere Mistral pero no hay API key configurada."
+            )
+
     last_error = None
 
     for attempt in range(max_retries):
